@@ -1,4 +1,4 @@
-
+from abc import ABC,abstractmethod
 import pandas as pd
 import os , requests , zipfile
 from DataEnums import BaseFileType
@@ -7,7 +7,7 @@ from DataEnums import BaseFileType
 
 
 
-class AbstractScrapper():
+class AbstractScrapper(ABC):
 
    """
    Essa classe fornece a interface utilizada pelas classes de webscrapping,que recebem informações sobre qual dado extrair (os parâmetros de INIT
@@ -17,6 +17,17 @@ class AbstractScrapper():
    """
 
    EXTRACTED_FILES_DIR:str = "tempfiles" #diretório temporário para guardar os arquivos .zip e de dados extraidos
+
+   @abstractmethod
+   def extract_database(website_url:str, file_type:BaseFileType)->pd.DataFrame | list[pd.DataFrame]:
+      """Extrai um arquivo e retorna ele como um Dataframe da base de dados oficial dado um URL para uma página e o tipo de dado do arquivo"""
+      pass
+
+   @abstractmethod
+   def download_database_locally(website_url:str, file_type:BaseFileType)->str:
+      """baixa um arquivo da base de dados oficial e retorna o caminho para ele dado um URL para uma página e o tipo de dado do arquivo"""
+      pass
+   
 
    def _download_and_extract_zipfile(self, file_url:str)->str:
       """
@@ -61,7 +72,7 @@ class AbstractScrapper():
       
       return os.path.join(self.EXTRACTED_FILES_DIR, data_file_name) #retorna o caminho para o arquivo extraido
    
-   def _dataframe_from_link(self, file_url:str, file_type, zipfile: bool = True)->pd.DataFrame:
+   def _dataframe_from_link(self, file_url:str, file_type: BaseFileType, zipfile: bool = True)->pd.DataFrame:
       """
       Dado um link para um arquivo , se ele for zip primeiro extrai e dps carrega o arquivo tabular extraido, caso não seja apenas usas as 
       funções do pandas para carregar essa arquivo em um Dataframe
