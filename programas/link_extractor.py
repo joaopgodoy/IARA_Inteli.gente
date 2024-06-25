@@ -55,11 +55,11 @@ def clicar_todos_os_anos(driver, anos):
             except Exception as e:
                 print(f"Erro ao processar o ano {ano}: {e}")
                 if i > 0 and ano > anos[i - 1]:
-                    print("Tentando clicar na seta direita para mostrar anos mais recentes...")
-                    clicar_na_seta(driver, "direita")  # Tentar clicar na seta direita
-                else:
-                    print("Tentando clicar na seta esquerda para mostrar anos mais antigos...")
+                    print("Tentando clicar na seta esquerda para mostrar anos mais recentes...")
                     clicar_na_seta(driver, "esquerda")  # Tentar clicar na seta esquerda
+                else:
+                    print("Tentando clicar na seta direita para mostrar anos mais antigos...")
+                    clicar_na_seta(driver, "direita")  # Tentar clicar na seta direita
 
 def extrair_links(url):
     driver = webdriver.Chrome()
