@@ -3,9 +3,12 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import requests 
 import re
 import time
 
+
+# ANTIGAS FUNÇÕES DE EXTRAÇÃO DOS LINKS POR INTERAÇÃO COM A PÁGINA
 def fechar_popup_inicial(driver):
     try:
         # Clicar no meio da tela para fechar o pop-up inicial
@@ -97,8 +100,27 @@ def extrair_links(url):
     
     return links
 
+
+
+# FUNÇÃO NOVA E BEM MAIS SIMPLES QUE EXTRAI DIRETO DO HTML DA PÁGINA 
+def extrair_links_simples(url):
+    # Faz a requisição HTTP para obter o conteúdo da página
+    response = requests.get(url)
+    response.raise_for_status()  # Garante que a requisição foi bem-sucedida
+    
+    # Obtém o conteúdo da página como texto
+    html = response.text
+    
+    # Define a expressão regular para encontrar os links desejados
+    regex = re.compile(r'https://download\.inep\.gov\.br/microdados/microdados_censo_da_educacao_superior_\d{4}\.zip')
+    
+    # Encontra todos os links que correspondem à expressão regular
+    links = regex.findall(html)
+    
+    return links
+
 if __name__ == "__main__":
-    url = "https://www.gov.br/inep/pt-br/areas-de-atuacao/pesquisas-estatisticas-e-indicadores/censo-da-educacao-superior/resultados"
-    links_encontrados = extrair_links(url)
+    url = "https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/censo-da-educacao-superior"
+    links_encontrados = extrair_links_simples(url)
     for link in links_encontrados:
         print(link)

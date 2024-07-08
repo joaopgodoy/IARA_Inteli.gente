@@ -1,4 +1,4 @@
-from link_extractor import extrair_links
+from link_extractor import extrair_links_simples
 from AbstractScrapper import download_and_extract_zipfile
 import requests, zipfile, io, os
 from AbstractScrapper import EXTRACTED_FILES_DIR
@@ -7,8 +7,8 @@ FILES_FOLDER_PATH = os.path.join(os.getcwd(), EXTRACTED_FILES_DIR)
 
 if __name__ == "__main__":
     
-    url = "https://www.gov.br/inep/pt-br/areas-de-atuacao/pesquisas-estatisticas-e-indicadores/censo-da-educacao-superior/resultados"
-    links_encontrados = extrair_links(url)
+    url = "https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/censo-da-educacao-superior"
+    links_encontrados = extrair_links_simples(url)
     
     if not os.path.isdir(FILES_FOLDER_PATH):
         os.mkdir(FILES_FOLDER_PATH)
