@@ -1,5 +1,4 @@
 from link_extractor import extrair_links_simples
-from AbstractScrapper import download_and_extract_zipfile
 import requests, zipfile, io, os
 from AbstractScrapper import EXTRACTED_FILES_DIR
 
@@ -17,4 +16,4 @@ if __name__ == "__main__":
         print(link)
         r = requests.get(link, verify=False)
         z = zipfile.ZipFile(io.BytesIO(r.content))
-        z.extractall("/home/joao/Desktop/IARA_Intelli.gente/IARA_Inteli.gente/programas/extracted_files")
+        z.extractall("/home/joao/Desktop/IARA_Intelli.gente/IARA_Inteli.gente/programas/vagas_ensino_superior/extracted_files")
