@@ -103,7 +103,7 @@ def extrair_links(url):
 
 
 # FUNÇÃO NOVA E BEM MAIS SIMPLES QUE EXTRAI DIRETO DO HTML DA PÁGINA 
-def extrair_links_simples(url):
+def extrair_links_simples(url, regex_pattern):
     # Faz a requisição HTTP para obter o conteúdo da página
     response = requests.get(url)
     response.raise_for_status()  # Garante que a requisição foi bem-sucedida
@@ -112,7 +112,7 @@ def extrair_links_simples(url):
     html = response.text
     
     # Define a expressão regular para encontrar os links desejados
-    regex = re.compile(r'https://download\.inep\.gov\.br/microdados/microdados_censo_da_educacao_superior_\d{4}\.zip')
+    regex = re.compile(regex_pattern)
     
     # Encontra todos os links que correspondem à expressão regular
     links = regex.findall(html)
