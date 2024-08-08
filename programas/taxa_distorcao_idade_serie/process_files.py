@@ -1,87 +1,62 @@
 import pandas as pd
 import os
-from AbstractScrapper import EXTRACTED_FILES_DIR
 
-FILES_FOLDER_PATH = os.path.join(os.getcwd(), EXTRACTED_FILES_DIR) 
-CSV_FOLDER = "dados"
+FILES_FOLDER_PATH = os.path.join(os.getcwd(), "extracted_files")  # Ajuste conforme necessário
 
-def outer_dir_loop(folder_path: str)->None:
-    inner_folder = os.listdir(folder_path)
+def process_all_files_in_directory(folder_path: str) -> None:
+    # Lista todas as subpastas no diretório
+    subfolders = [f.path for f in os.scandir(folder_path) if f.is_dir()]
+    print("Subpastas encontradas:", subfolders)
 
-    for folder in inner_folder:
+    for subfolder in subfolders:
+        files_list = os.listdir(subfolder)
+        print("Arquivos encontrados na subpasta", subfolder, ":", files_list)
+        for file in files_list:
+            if file.endswith(".xlsx") and "TDI_MUNICIPIOS" in file:
+                file_correct_path = os.path.join(subfolder, file)
+                print("Processando arquivo:", file_correct_path)
+                if not data_file_process(file_correct_path):
+                    print(f"Processamento falhou em um dos arquivos: {file_correct_path}")
+                else:
+                    print(f"Processamento bem-sucedido para o arquivo: {file_correct_path}")
 
-        folder_correct_path = os.path.join(FILES_FOLDER_PATH, folder)
-        if not os.path.isdir(folder_correct_path):
-            continue
-
-        if not data_dir_process(folder_correct_path):
-            print("Processamento falhou em um dos folders")
-
-        break
-
-def data_dir_process(folder_path: str)->bool:    
-    inner_folder = os.listdir(folder_path)
-
-    if CSV_FOLDER not in inner_folder:
+def data_file_process(file_path: str) -> bool:
+    try:
+        process_df(file_path)
+        return True
+    except Exception as e:
+        print(f"Erro ao processar o arquivo {file_path}: {e}")
         return False
+
+def process_df(xlsx_file_path: str) -> pd.DataFrame:
+    # Ler o arquivo XLSX a partir da linha 6 como cabeçalho e a partir da linha 9 para os dados
+    df = pd.read_excel(xlsx_file_path, header=6, skiprows=[7, 8])
+
+    # Exibe os nomes das colunas para verificação
+    print(f"Colunas disponíveis no arquivo {xlsx_file_path}: {df.columns.tolist()}")
+
+    # Usar a coluna 'Unnamed: 4' para os nomes dos municípios
+    municipality_col = 'Unnamed: 4'
+    total_col = 'Total'
+    location_col = 'Unnamed: 5'  # Supondo que a coluna de localização seja 'Unnamed: 5'
+    admin_dependency_col = 'Unnamed: 6'  # Supondo que a coluna de dependência administrativa seja 'Unnamed: 6'
+
+    if municipality_col not in df.columns or total_col not in df.columns or location_col not in df.columns or admin_dependency_col not in df.columns:
+        raise ValueError(f"Colunas necessárias ('{municipality_col}', '{total_col}', '{location_col}', '{admin_dependency_col}') não encontradas no arquivo {xlsx_file_path}")
+
+    # Filtra as linhas onde a coluna 'Localização' contém o valor 'Total' e a coluna 'Dependência Administrativa' contém o valor 'Total'
+    df_filtered = df[(df[location_col] == 'Total') & (df[admin_dependency_col] == 'Total')]
+
+    filtered_df = df_filtered[[municipality_col, total_col]]
+    print(filtered_df.head())  # Exibe uma amostra dos dados filtrados
     
-    data_folder = os.path.join(folder_path, CSV_FOLDER)
-    data_files_list = os.listdir(data_folder)
-    
-    is_courses_file = lambda x : "CURSOS" in x
-    filtered_list:list[str] = list(filter(is_courses_file,data_files_list))
-    if len(filtered_list) > 1:
-        return False
-    csv_file:str = filtered_list[0]
+    # Itera sobre as linhas e imprime os municípios e seus valores totais
+    for index, row in filtered_df.iterrows():
+        municipio = row[municipality_col]
+        total_value = row[total_col]
+        print(f"Município: {municipio}, Total: {total_value}")
 
-    full_csv_file_path: str = os.path.join(data_folder,csv_file)
-    process_df(full_csv_file_path)
+    return filtered_df
 
-    return True
-    
-
-
-
-def process_df(csv_file_path:str)->pd.DataFrame:
-    RELEVANT_COLS: list[str] = ["TP_GRAU_ACADEMICO","TP_NIVEL_ACADEMICO","TP_ORGANIZACAO_ACADEMICA",
-    "TP_CATEGORIA_ADMINISTRATIVA","QT_VG_TOTAL","CO_MUNICIPIO","TP_MODALIDADE_ENSINO"]
-
-    df: pd.DataFrame = pd.read_csv(csv_file_path,sep=";",encoding="latin-1",usecols=RELEVANT_COLS)
-    print(df.info())
-    print(df["QT_VG_TOTAL"].notna)
-    filter_df(df)
-
-
-def filter_df(df:pd.DataFrame)->pd.DataFrame:
-    DATA_COL:str = "QT_VG_TOTAL"
-    
-    
-    cols_and_filter_vals: dict[str,list] = {
-        "TP_GRAU_ACADEMICO": [1,2,3,4],
-        "TP_NIVEL_ACADEMICO": [1,2],
-        "TP_ORGANIZACAO_ACADEMICA": [1,2,3,4,5],
-        "TP_CATEGORIA_ADMINISTRATIVA": [1,2,3,4,5,7],
-        "TP_MODALIDADE_ENSINO" :[1]
-    }
-
-    df = df.dropna(axis="index",subset=["TP_GRAU_ACADEMICO","TP_NIVEL_ACADEMICO","TP_ORGANIZACAO_ACADEMICA","TP_CATEGORIA_ADMINISTRATIVA"])
-
-    df["TP_GRAU_ACADEMICO"] = df["TP_GRAU_ACADEMICO"].astype("int")
-    df["TP_NIVEL_ACADEMICO"] = df["TP_NIVEL_ACADEMICO"].astype("int")
-    df["TP_ORGANIZACAO_ACADEMICA"] = df["TP_ORGANIZACAO_ACADEMICA"].astype("int")
-    df["TP_CATEGORIA_ADMINISTRATIVA"] = df["TP_CATEGORIA_ADMINISTRATIVA"].astype("int")
-    
-
-
-   
-    for key,val in cols_and_filter_vals.items():
-        filter_col = lambda x: x in val
-        
-        filtered_series = df[key].apply(filter_col)
-        df = df[filtered_series]
-
-    print(df.shape)
-    
-    
-
-outer_dir_loop(FILES_FOLDER_PATH)
+# Chamada da função principal
+process_all_files_in_directory(FILES_FOLDER_PATH)
