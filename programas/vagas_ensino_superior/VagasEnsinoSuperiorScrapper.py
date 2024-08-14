@@ -81,9 +81,13 @@ class UnifiedScrapper(AbstractScrapper):
                                 file_path = os.path.join(dados_folder, filename)
                                 print(f"Lendo arquivo CSV: {file_path}")
                                 try:
-                                    df = pd.read_csv(file_path)
+                                    # Lê o arquivo, mas apenas a coluna de interesse
+                                    df = pd.read_csv(file_path, encoding='latin1', delimiter=';', usecols=['QT_VG_TOTAL'])
                                     year_data_points.append(YearDataPoint(df=df, data_year=ano))
                                     print(f"Arquivo {filename} adicionado à lista year_data_points")
+                                    
+                                    # Adiciona um print para visualizar o DataFrame
+                                    print(f"Prévia do DataFrame do ano {ano} (Vagas Totais):\n", df.head())
                                 except Exception as e:
                                     print(f"Erro ao ler o arquivo {filename}: {e}")
                             else:
@@ -95,6 +99,9 @@ class UnifiedScrapper(AbstractScrapper):
         
         print(f"Total de YearDataPoints adicionados: {len(year_data_points)}")
         return year_data_points
+
+
+
 
 if __name__ == "__main__":
     url = "https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/censo-da-educacao-superior"
