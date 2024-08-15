@@ -62,10 +62,10 @@ class UnifiedScrapper(AbstractScrapper):
                 ano = int(ano_match.group(0))
                 extract_path = os.path.join(self.files_folder_path, f"year_{ano}")
                 os.makedirs(extract_path, exist_ok=True)
-                
+
                 # Baixa e extrai o arquivo zip
                 self.download_and_extract(link, extract_path)
-                
+
                 # Entra na única subpasta dentro da pasta "year_xxxx"
                 subfolder_path = self.find_single_subfolder(extract_path)
                 if subfolder_path:
@@ -74,20 +74,20 @@ class UnifiedScrapper(AbstractScrapper):
                     if dados_folder:
                         extracted_files = os.listdir(dados_folder)
                         print(f"Arquivos extraídos na pasta 'dados' para o ano {ano}: {extracted_files}")
-                        
+
                         # Carrega os dados extraídos em um DataFrame (assumindo que é CSV)
                         for filename in extracted_files:
                             if f"MICRODADOS" in filename.upper():
                                 file_path = os.path.join(dados_folder, filename)
                                 print(f"Lendo arquivo CSV: {file_path}")
                                 try:
-                                    # Lê o arquivo, mas apenas a coluna de interesse
-                                    df = pd.read_csv(file_path, encoding='latin1', delimiter=';', usecols=['QT_VG_TOTAL'])
+                                    # Lê o arquivo, mas apenas as colunas de interesse
+                                    df = pd.read_csv(file_path, encoding='latin1', delimiter=';', usecols=['NO_MUNICIPIO', 'QT_VG_TOTAL'])
                                     year_data_points.append(YearDataPoint(df=df, data_year=ano))
                                     print(f"Arquivo {filename} adicionado à lista year_data_points")
-                                    
+
                                     # Adiciona um print para visualizar o DataFrame
-                                    print(f"Prévia do DataFrame do ano {ano} (Vagas Totais):\n", df.head())
+                                    print(f"Prévia do DataFrame do ano {ano} (Nome do Município e Vagas Totais):\n", df.head())
                                 except Exception as e:
                                     print(f"Erro ao ler o arquivo {filename}: {e}")
                             else:
@@ -96,9 +96,10 @@ class UnifiedScrapper(AbstractScrapper):
                         print(f"A pasta 'dados' não foi encontrada em {subfolder_path}")
                 else:
                     print(f"Nenhuma subpasta única encontrada em {extract_path}")
-        
+
         print(f"Total de YearDataPoints adicionados: {len(year_data_points)}")
         return year_data_points
+
 
 
 
