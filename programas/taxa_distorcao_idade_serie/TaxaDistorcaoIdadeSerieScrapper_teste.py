@@ -15,11 +15,11 @@ from AbstractScrapper import AbstractScrapper
 
 class UnifiedScrapper(AbstractScrapper):
 
-    def __init__(self, url: str, regex_pattern_newer: str):
+    def __init__(self, url: str, regex_pattern: str):
         self.url = url
-        self.regex_pattern_newer = regex_pattern_newer
+        self.regex_pattern = regex_pattern
         self.files_folder_path = self._create_downloaded_files_dir()
-        print(f"Initialized UnifiedScrapper with URL: {url}")
+        print(f"Initialized UnifiedScrapper with URL: {url} and regex pattern: {regex_pattern}")
         print(f"Files will be saved in: {self.files_folder_path}")
 
     def extrair_links(self):
@@ -41,13 +41,9 @@ class UnifiedScrapper(AbstractScrapper):
         html_content = driver.page_source
         driver.quit()
 
-        # Padrões regex para encontrar os links específicos
-        pattern_newer = re.compile(self.regex_pattern_newer)
-
-        # Encontra os links usando ambos os padrões
-        links = pattern_newer.findall(html_content)
-
-        
+        # Padrão regex para encontrar os links específicos
+        pattern = re.compile(self.regex_pattern)
+        links = pattern.findall(html_content)
         print(f"Links encontrados: {links}")
 
         return links
@@ -91,17 +87,14 @@ class UnifiedScrapper(AbstractScrapper):
                     )
                     driver.execute_script("arguments[0].scrollIntoView();", ano_element)
                     driver.execute_script("arguments[0].click();", ano_element)
-                    time.sleep(3)
+                    time.sleep(2)
                     break
                 except Exception as e:
                     print(f"Erro ao processar o ano {ano}: {e}")
                     if i > 0 and ano > anos[i - 1]:
-                        print(f"Tentando clicar na seta para a esquerda para mostrar anos mais recentes...")
                         self.clicar_na_seta(driver, "esquerda")
                     else:
-                        print(f"Tentando clicar na seta para a direita para mostrar anos mais antigos...")
                         self.clicar_na_seta(driver, "direita")
-                    time.sleep(2)
 
     def extract_database(self):
         year_data_points = []
@@ -143,7 +136,7 @@ class UnifiedScrapper(AbstractScrapper):
             files_list = os.listdir(subfolder)
             print(f"Arquivos encontrados na subpasta {subfolder}: {files_list}")
             for file in files_list:
-                if file.endswith(".xlsx") and ("TDI" in file or "tdi" in file):
+                if file.endswith(".xlsx") and "TDI_MUNICIPIOS" in file:
                     file_correct_path = os.path.join(subfolder, file)
                     print(f"Processando arquivo: {file_correct_path}")
                     df = self.process_df(file_correct_path)
@@ -196,9 +189,9 @@ class UnifiedScrapper(AbstractScrapper):
 
 if __name__ == "__main__":
     url = "https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/indicadores-educacionais/taxas-de-distorcao-idade-serie"
-    regex_pattern_newer = r'https://download\.inep\.gov\.br/informacoes_estatisticas/indicadores_educacionais/\d{4}/distorcao_idade_serie/tdi_municipios_\d{4}.zip'
+    regex_pattern = r'https://download\.inep\.gov\.br/informacoes_estatisticas/indicadores_educacionais/\d{4}/TDI_\d{4}_MUNICIPIOS.zip'
 
-    scrapper = UnifiedScrapper(url, regex_pattern_newer)
+    scrapper = UnifiedScrapper(url, regex_pattern)
     year_data_points = scrapper.extract_database()
 
     for data_point in year_data_points:
