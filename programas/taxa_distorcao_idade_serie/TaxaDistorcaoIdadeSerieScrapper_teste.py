@@ -15,9 +15,8 @@ from AbstractScrapper import AbstractScrapper
 
 class UnifiedScrapper(AbstractScrapper):
 
-    def __init__(self, url: str, regex_pattern_older: str, regex_pattern_newer: str):
+    def __init__(self, url: str, regex_pattern_newer: str):
         self.url = url
-        self.regex_pattern_older = regex_pattern_older
         self.regex_pattern_newer = regex_pattern_newer
         self.files_folder_path = self._create_downloaded_files_dir()
         print(f"Initialized UnifiedScrapper with URL: {url}")
@@ -43,15 +42,12 @@ class UnifiedScrapper(AbstractScrapper):
         driver.quit()
 
         # Padrões regex para encontrar os links específicos
-        pattern_older = re.compile(self.regex_pattern_older)
         pattern_newer = re.compile(self.regex_pattern_newer)
 
         # Encontra os links usando ambos os padrões
-        links_older = pattern_older.findall(html_content)
-        links_newer = pattern_newer.findall(html_content)
+        links = pattern_newer.findall(html_content)
 
-        # Combina ambos os tipos de links
-        links = links_older + links_newer
+        
         print(f"Links encontrados: {links}")
 
         return links
@@ -200,10 +196,9 @@ class UnifiedScrapper(AbstractScrapper):
 
 if __name__ == "__main__":
     url = "https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/indicadores-educacionais/taxas-de-distorcao-idade-serie"
-    regex_pattern_older = r'https://download\.inep\.gov\.br/informacoes_estatisticas/indicadores_educacionais/\d{4}/TDI_\d{4}_MUNICIPIOS.zip'
-    regex_pattern_newer = r'https://download\.inep\.gov\.br/informacoes_estatisticas/indicadores_educacionais/\d{4}/tdi_municipios_\d{4}.zip'
+    regex_pattern_newer = r'https://download\.inep\.gov\.br/informacoes_estatisticas/indicadores_educacionais/\d{4}/distorcao_idade_serie/tdi_municipios_\d{4}.zip'
 
-    scrapper = UnifiedScrapper(url, regex_pattern_older, regex_pattern_newer)
+    scrapper = UnifiedScrapper(url, regex_pattern_newer)
     year_data_points = scrapper.extract_database()
 
     for data_point in year_data_points:
