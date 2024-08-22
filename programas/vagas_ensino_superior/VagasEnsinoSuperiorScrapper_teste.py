@@ -1,24 +1,30 @@
-import os
-import re
+import os, time, re ,requests , zipfile
 import pandas as pd
 from YearDataPoint import YearDataPoint
 from AbstractScrapper import AbstractScrapper
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 class UnifiedScrapper(AbstractScrapper):
     
-    def __init__(self, url: str, regex_pattern: str):
-        self.url = url
-        self.regex_pattern = regex_pattern
-        self.files_folder_path = self._create_downloaded_files_dir()
+    URL =  "https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/censo-da-educacao-superior"
+
+    def __init__(self):
+        self._create_downloaded_files_dir()
 
     def extract_database(self)->list[YearDataPoint]:
+        links:list[str] = self.__get_file_links()
+        self.__download_zipfiles(links)
+        self.__extract_zipfiles()
+        
         year_data_points = []
 
         # Modificação para acessar pastas já extraídas localmente
-        inner_folder = os.listdir(self.files_folder_path)
+        inner_folder = os.listdir(self.DOWNLOADED_FILES_PATH)
+        print(inner_folder)
 
         for folder in inner_folder:
-            folder_correct_path = os.path.join(self.files_folder_path, folder)
+            folder_correct_path = os.path.join(self.DOWNLOADED_FILES_PATH, folder)
             print(f"Processando pasta: {folder_correct_path}")
             if not os.path.isdir(folder_correct_path):
                 print(f"Não é um diretório: {folder_correct_path}")
@@ -33,6 +39,69 @@ class UnifiedScrapper(AbstractScrapper):
         
         print(f"Total de YearDataPoints processados: {len(year_data_points)}")
         return year_data_points
+
+    def __get_file_links(self)->list[str]:
+        # FUNÇÃO NOVA E BEM MAIS SIMPLES QUE EXTRAI DIRETO DO HTML DA PÁGINA 
+        regex_pattern =  r'https://download\.inep\.gov\.br/microdados/microdados_censo_da_educacao_superior_\d{4}\.zip'
+        # Faz a requisição HTTP para obter o conteúdo da página
+        response = requests.get(self.URL) 
+        #response.raise_for_status()  # Garante que a requisição foi bem-sucedida
+        
+        # Obtém o conteúdo da página como texto
+        html = response.text
+        
+        # Define a expressão regular para encontrar os links desejados
+        regex = re.compile(regex_pattern)
+        
+        # Encontra todos os links que correspondem à expressão regular
+        links = regex.findall(html)
+        
+        return links
+
+    def __download_zipfiles(self,urls:list[str])->None:  
+        downloaded_files_dir: str = self.DOWNLOADED_FILES_PATH 
+
+        chrome_options = Options()
+        chrome_options.add_experimental_option("prefs", {
+            "download.default_directory": downloaded_files_dir,  # Set the download directory
+            "download.prompt_for_download": False,  # Disable the prompt for download
+            "download.directory_upgrade": True,  # Ensure directory upgrade
+            "safebrowsing.enabled": True  # Enable safe browsing
+        })
+
+        # Set up the Chrome driver
+        driver = webdriver.Chrome(options=chrome_options)
+        if not os.path.isdir(downloaded_files_dir):
+                os.mkdir(downloaded_files_dir)
+
+        for url in urls:
+            # Open the browser and navigate to the URL
+            driver.get(url)
+            time.sleep(5)
+
+            files_in_dir:list[str] =  os.listdir(downloaded_files_dir)
+            print(files_in_dir)
+
+            while not any(map(lambda x: ".zip" in x , files_in_dir)): #enquanto nenhum arquivo no dir for um .zip
+                time.sleep(5)
+                files_in_dir = os.listdir(downloaded_files_dir)
+            
+            time.sleep(5)  
+        driver.quit()
+
+    def __extract_zipfiles(self)->None:
+        files = os.listdir(self.DOWNLOADED_FILES_PATH)
+
+        for file in files: #loop pelos arquivos do diretório
+            if not ".zip" in file: 
+                continue
+            with zipfile.ZipFile(os.path.join(self.DOWNLOADED_FILES_PATH, file), "r") as zip_ref:
+                zip_ref.extractall(self.DOWNLOADED_FILES_PATH) #extrai arquivo zip
+        
+        new_files = os.listdir(self.DOWNLOADED_FILES_PATH)
+        for file in new_files:
+            if ".zip" in file or ".crdownload" in file:
+                os.remove(os.path.join(self.DOWNLOADED_FILES_PATH,file)) #remove os arquivos zips ou arquivos temporários do chrome
 
     def data_dir_process(self, folder_path: str) -> YearDataPoint:
         print(f"Entrando na pasta: {folder_path}")
@@ -117,11 +186,8 @@ class UnifiedScrapper(AbstractScrapper):
         return int(ano_match.group(0)) if ano_match else None
 
 
-if __name__ == "__main__":
-    url = "https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/censo-da-educacao-superior"
-    regex_pattern = r'https://download\.inep\.gov\.br/microdados/microdados_censo_da_educacao_superior_\d{4}\.zip'
-    
-    scrapper = UnifiedScrapper(url, regex_pattern)
+if __name__ == "__main__":    
+    scrapper = UnifiedScrapper()
     year_data_points = scrapper.extract_database()
     
     for data_point in year_data_points:

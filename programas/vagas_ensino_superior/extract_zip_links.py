@@ -16,4 +16,4 @@ if __name__ == "__main__":
         print(link)
         r = requests.get(link)
         z = zipfile.ZipFile(io.BytesIO(r.content))
-        #z.extractall("/home/joao/Desktop/IARA_Intelli.gente/IARA_Inteli.gente/programas/vagas_ensino_superior/extracted_files")
+        z.extractall("/home/joao/Desktop/IARA_Intelli.gente/IARA_Inteli.gente/programas/vagas_ensino_superior/extracted_files")
