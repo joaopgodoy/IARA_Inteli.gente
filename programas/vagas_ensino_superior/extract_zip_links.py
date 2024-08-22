@@ -1,4 +1,4 @@
-from link_extractor import extrair_links_simples
+from link_extractor import extrair_links_simples,extrair_links
 import requests, zipfile, io, os
 
 FILES_FOLDER_PATH = os.path.join(os.getcwd(), "extracted_files") 
@@ -14,6 +14,6 @@ if __name__ == "__main__":
 
     for link in links_encontrados:
         print(link)
-        r = requests.get(link, verify=False)
+        r = requests.get(link)
         z = zipfile.ZipFile(io.BytesIO(r.content))
-        z.extractall("/home/joao/Desktop/IARA_Intelli.gente/IARA_Inteli.gente/programas/vagas_ensino_superior/extracted_files")
+        #z.extractall("/home/joao/Desktop/IARA_Intelli.gente/IARA_Inteli.gente/programas/vagas_ensino_superior/extracted_files")

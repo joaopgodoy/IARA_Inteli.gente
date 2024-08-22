@@ -11,7 +11,7 @@ class UnifiedScrapper(AbstractScrapper):
         self.regex_pattern = regex_pattern
         self.files_folder_path = self._create_downloaded_files_dir()
 
-    def extract_database(self):
+    def extract_database(self)->list[YearDataPoint]:
         year_data_points = []
 
         # Modificação para acessar pastas já extraídas localmente
@@ -125,4 +125,4 @@ if __name__ == "__main__":
     year_data_points = scrapper.extract_database()
     
     for data_point in year_data_points:
-        print(f"Ano: {data_point.data_year}, DataFrame Shape: {data_point.df.shape}")
+        print(f"Ano: {data_point.data_year}, DataFrame Shape: {data_point.df.shape}, Df info {data_point.df.info()}")
