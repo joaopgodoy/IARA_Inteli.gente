@@ -6,7 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from functools import reduce
 
-class UnifiedScrapper(AbstractScrapper):
+class HigherEducaPositionsScrapper(AbstractScrapper):
     
     URL =  "https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/censo-da-educacao-superior"
 
@@ -188,7 +188,7 @@ class UnifiedScrapper(AbstractScrapper):
 
 
 if __name__ == "__main__":    
-    scrapper = UnifiedScrapper()
+    scrapper = HigherEducaPositionsScrapper()
     year_data_points = scrapper.extract_database()
     print(f"tam da lista de year data points: {len(year_data_points)}")
     
