@@ -220,6 +220,7 @@ class UnifiedScrapper(AbstractScrapper):
             },axis="columns")
 
             filtered_df["codigo_municipio"] = filtered_df["codigo_municipio"].astype("int")
+            filtered_df = filtered_df.reset_index(drop=True)
 
             return filtered_df
         except Exception as e:
