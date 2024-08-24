@@ -20,20 +20,20 @@ class UnifiedScrapper(AbstractScrapper):
     def __init__(self):
         self.files_folder_path = self._create_downloaded_files_dir()
 
-    def extrair_links(self)->list[str]:
+    def __extract_links(self)->list[str]:
         driver = webdriver.Chrome()
         driver.maximize_window()
-        driver.get(self.url)
+        driver.get(self.URL)
 
         # Esperar um pouco para garantir que a página carregue completamente
         driver.implicitly_wait(10)
 
         # Fechar o pop-up inicial clicando no meio da tela
-        self.fechar_popup_inicial(driver)
+        self.__close_start_popup(driver)
 
         # Processar os anos desejados
         anos = range(2023,2021,-1)
-        self.clicar_todos_os_anos(driver, anos)
+        self.__click_on_all_years(driver, anos)
 
         # Obter o conteúdo da página renderizada após clicar em todos os anos
         html_content = driver.page_source
@@ -48,7 +48,7 @@ class UnifiedScrapper(AbstractScrapper):
 
         return links
 
-    def fechar_popup_inicial(self, driver):
+    def __close_start_popup(self, driver):
         try:
             driver.implicitly_wait(5)
             window_size = driver.get_window_size()
@@ -62,7 +62,7 @@ class UnifiedScrapper(AbstractScrapper):
         except Exception as e:
             print(f"Não foi possível fechar o pop-up inicial clicando no meio da tela: {e}")
 
-    def clicar_na_seta(self, driver, direcao):
+    def __click_side_arrows(self, driver, direcao):
         if direcao == "esquerda":
             selector = "#content-core > div.govbr-tabs.swiper-container-initialized.swiper-container-horizontal.swiper-container-free-mode > div.button-prev > span"
         elif direcao == "direita":
@@ -77,7 +77,7 @@ class UnifiedScrapper(AbstractScrapper):
         except Exception as e:
             print(f"Não foi possível clicar na seta {direcao}: {e}")
 
-    def clicar_todos_os_anos(self, driver, anos):
+    def __click_on_all_years(self, driver, anos):
         max_tries:int = 3
         for i, ano in enumerate(anos):
             cur_try:int = 0
@@ -95,16 +95,16 @@ class UnifiedScrapper(AbstractScrapper):
                     cur_try += 1
                     print(f"Erro ao processar o ano {ano}: {e}")
                     if i > 0 and ano > anos[i - 1]:
-                        self.clicar_na_seta(driver, "esquerda")
+                        self.__click_side_arrows(driver, "esquerda")
                     else:
                         print("direita")
-                        self.clicar_na_seta(driver, "direita")
+                        self.__click_side_arrows(driver, "direita")
 
     def extract_database(self)->list[YearDataPoint]:
         year_data_points = []
 
         # Extração dos links das páginas
-        links = self.extrair_links()[:2]
+        links = self.__extract_links()[:2]
         self.__download_and_extract_zipfiles(links)
         print("extraiu todos os zipfiles")
      
@@ -115,7 +115,7 @@ class UnifiedScrapper(AbstractScrapper):
                 print(f"Não é um diretório: {folder_correct_path}")
                 continue
 
-            year_data_point = self.data_dir_process(folder_correct_path)
+            year_data_point = self.__data_dir_process(folder_correct_path)
             if year_data_point:
                 year_data_points.append(year_data_point)
                 print(f"Processamento concluído na pasta {folder_correct_path} com sucesso.")
@@ -124,55 +124,6 @@ class UnifiedScrapper(AbstractScrapper):
 
         print(f"Total de YearDataPoints processados: {len(year_data_points)}")
         return year_data_points
-
-    def __download_zipfiles(self,urls:list[str])->None:  
-        downloaded_files_dir: str = self.DOWNLOADED_FILES_PATH 
-
-        chrome_options = Options()
-        chrome_options.add_experimental_option("prefs", {
-            "download.default_directory": downloaded_files_dir,  # Set the download directory
-            "download.prompt_for_download": False,  # Disable the prompt for download
-            "download.directory_upgrade": True,  # Ensure directory upgrade
-            "safebrowsing.enabled": True  # Enable safe browsing
-        })
-
-        # Set up the Chrome driver
-        driver = webdriver.Chrome(options=chrome_options)
-        if not os.path.isdir(downloaded_files_dir):
-            os.mkdir(downloaded_files_dir)
-
-        extracted_zipfile_count:int = 0 #variavel para contar quantos zipfiles existes
-        for url in urls:
-            # Open the browser and navigate to the URL
-            driver.get(url)
-            time.sleep(5)
-
-            files_in_dir:list[str] =  os.listdir(downloaded_files_dir)
-            new_zipfiles_count:int = reduce(lambda count,filename: count+1 if ".zip" in filename else count,files_in_dir,0) #conta numero de zipfiles no folder
-
-            while new_zipfiles_count == extracted_zipfile_count: #enquanto nenhum arquivo no dir for um .zip
-                time.sleep(5)
-                files_in_dir = os.listdir(downloaded_files_dir)
-                new_zipfiles_count:int = reduce(lambda count,filename: count+1 if ".zip" in filename else count,files_in_dir,0) #conta numero de zipfiles no folder
-            
-            extracted_zipfile_count = new_zipfiles_count #atualiza variável de arquivos zip extraidos
-            print(extracted_zipfile_count)
-            time.sleep(5)  
-        driver.quit()
-
-    def __extract_zipfiles(self)->None:
-        files = os.listdir(self.DOWNLOADED_FILES_PATH)
-
-        for file in files: #loop pelos arquivos do diretório
-            if not ".zip" in file: 
-                continue
-            with zipfile.ZipFile(os.path.join(self.DOWNLOADED_FILES_PATH, file), "r") as zip_ref:
-                zip_ref.extractall(self.DOWNLOADED_FILES_PATH) #extrai arquivo zip
-        
-        new_files = os.listdir(self.DOWNLOADED_FILES_PATH)
-        for file in new_files:
-            if ".zip" in file or ".crdownload" in file:
-                os.remove(os.path.join(self.DOWNLOADED_FILES_PATH,file)) #remove os arquivos zips ou arquivos temporários do chrome
 
     def __download_and_extract_zipfiles(self,urls:list[str])->None:
         #baixar arquivos zips
@@ -223,7 +174,7 @@ class UnifiedScrapper(AbstractScrapper):
             if ".zip" in file or ".crdownload" in file:
                 os.remove(os.path.join(self.DOWNLOADED_FILES_PATH,file)) #remove os arquivos zips ou arquivos temporários do chrome
 
-    def data_dir_process(self, folder_path: str) -> YearDataPoint:
+    def __data_dir_process(self, folder_path: str) -> YearDataPoint:
         print(f"Entrando na pasta: {folder_path}")
         files_list:list[str] = os.listdir(folder_path)
 
@@ -231,9 +182,9 @@ class UnifiedScrapper(AbstractScrapper):
             if file.endswith(".xlsx") and "TDI_MUNICIPIOS" in file:
                     file_correct_path = os.path.join(folder_path, file)
                     print(f"Processando arquivo: {file_correct_path}")
-                    df = self.process_df(file_correct_path)
+                    df = self.__process_df(file_correct_path)
                     if df is not None:
-                        year = self.extract_year_from_path(folder_path)
+                        year = self.__extract_year_from_path(folder_path)
                         print(f"path: {file_correct_path}, ano: {year}")
                         if year:
                             print(f"Criando YearDataPoint para o ano {year}")
@@ -246,7 +197,7 @@ class UnifiedScrapper(AbstractScrapper):
         print(f"Não foram encontrados arquivos .xlsx relevantes em {folder_path}")
         return None
 
-    def process_df(self, xlsx_file_path: str) -> pd.DataFrame:
+    def __process_df(self, xlsx_file_path: str) -> pd.DataFrame:
         try:
             cols = ['Unnamed: 3','Unnamed: 5','Unnamed: 6','Total']
 
@@ -275,7 +226,7 @@ class UnifiedScrapper(AbstractScrapper):
             print(f"Erro ao processar o DataFrame: {e}")
             return None
 
-    def extract_year_from_path(self, path: str) -> int:
+    def __extract_year_from_path(self, path: str) -> int:
         print(f"Extraindo ano do caminho: {path}")
         ano_match = re.search(r'\d{4}', path)
         if ano_match:
@@ -288,8 +239,6 @@ class UnifiedScrapper(AbstractScrapper):
 
 
 if __name__ == "__main__":
-    url = "https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/indicadores-educacionais/taxas-de-distorcao-idade-serie"
-
     scrapper = UnifiedScrapper()
     year_data_points:list[YearDataPoint] = scrapper.extract_database()
 
