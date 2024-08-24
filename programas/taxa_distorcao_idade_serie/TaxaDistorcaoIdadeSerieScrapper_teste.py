@@ -10,6 +10,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.chrome.options import Options
+from functools import reduce
 from YearDataPoint import YearDataPoint
 from AbstractScrapper import AbstractScrapper
 
@@ -34,7 +36,7 @@ class UnifiedScrapper(AbstractScrapper):
         self.fechar_popup_inicial(driver)
 
         # Processar os anos desejados
-        anos = range(2006, 2022+1)
+        anos = range(2023,2021,-1)
         self.clicar_todos_os_anos(driver, anos)
 
         # Obter o conteúdo da página renderizada após clicar em todos os anos
@@ -78,8 +80,10 @@ class UnifiedScrapper(AbstractScrapper):
             print(f"Não foi possível clicar na seta {direcao}: {e}")
 
     def clicar_todos_os_anos(self, driver, anos):
+        max_tries:int = 3
         for i, ano in enumerate(anos):
-            while True:
+            cur_try:int = 0
+            while cur_try < max_tries:
                 try:
                     print(f"Processando o ano {ano}...")
                     ano_element = WebDriverWait(driver, 10).until(
@@ -90,38 +94,91 @@ class UnifiedScrapper(AbstractScrapper):
                     time.sleep(2)
                     break
                 except Exception as e:
+                    cur_try += 1
                     print(f"Erro ao processar o ano {ano}: {e}")
                     if i > 0 and ano > anos[i - 1]:
                         self.clicar_na_seta(driver, "esquerda")
                     else:
+                        print("direita")
                         self.clicar_na_seta(driver, "direita")
 
     def extract_database(self):
         year_data_points = []
 
         # Extração dos links das páginas
-        links = self.extrair_links()
+        links = self.extrair_links()[:2]
+        self.__download_zipfiles(links) #baixa os arquivos zip localmente
+        time.sleep(5)
+        print("baixou todos os zip")
+        self.__extract_zipfiles()
+        print("extraiu todos os zipfiles")
+     
+        inner_folder = os.listdir(self.DOWNLOADED_FILES_PATH)
+        for folder in inner_folder:
+            folder_correct_path = os.path.join(self.DOWNLOADED_FILES_PATH, folder)
+            if not os.path.isdir(folder_correct_path):
+                print(f"Não é um diretório: {folder_correct_path}")
+                continue
 
-        if not os.path.isdir(self.files_folder_path):
-            os.mkdir(self.files_folder_path)
-
-        for link in links:
-            print(f"Baixando e extraindo: {link}")
-            r = requests.get(link, verify=False)
-            z = zipfile.ZipFile(io.BytesIO(r.content))
-            extract_path = os.path.join(self.files_folder_path, self.extract_year_from_link(link))
-            os.makedirs(extract_path, exist_ok=True)
-            z.extractall(extract_path)
-
-            year_data_point = self.data_dir_process(extract_path)
+            year_data_point = self.data_dir_process(folder_correct_path)
             if year_data_point:
                 year_data_points.append(year_data_point)
-                print(f"Processamento concluído na pasta {extract_path} com sucesso.")
+                print(f"Processamento concluído na pasta {folder_correct_path} com sucesso.")
             else:
-                print(f"Processamento falhou na pasta {extract_path}")
+                print(f"Processamento falhou na pasta {folder_correct_path}")
 
         print(f"Total de YearDataPoints processados: {len(year_data_points)}")
         return year_data_points
+
+
+    def __download_zipfiles(self,urls:list[str])->None:  
+        downloaded_files_dir: str = self.DOWNLOADED_FILES_PATH 
+
+        chrome_options = Options()
+        chrome_options.add_experimental_option("prefs", {
+            "download.default_directory": downloaded_files_dir,  # Set the download directory
+            "download.prompt_for_download": False,  # Disable the prompt for download
+            "download.directory_upgrade": True,  # Ensure directory upgrade
+            "safebrowsing.enabled": True  # Enable safe browsing
+        })
+
+        # Set up the Chrome driver
+        driver = webdriver.Chrome(options=chrome_options)
+        if not os.path.isdir(downloaded_files_dir):
+            os.mkdir(downloaded_files_dir)
+
+        extracted_zipfile_count:int = 0 #variavel para contar quantos zipfiles existes
+        for url in urls:
+            # Open the browser and navigate to the URL
+            driver.get(url)
+            time.sleep(5)
+
+            files_in_dir:list[str] =  os.listdir(downloaded_files_dir)
+            new_zipfiles_count:int = reduce(lambda count,filename: count+1 if ".zip" in filename else count,files_in_dir,0) #conta numero de zipfiles no folder
+
+            while new_zipfiles_count == extracted_zipfile_count: #enquanto nenhum arquivo no dir for um .zip
+                time.sleep(5)
+                files_in_dir = os.listdir(downloaded_files_dir)
+                new_zipfiles_count:int = reduce(lambda count,filename: count+1 if ".zip" in filename else count,files_in_dir,0) #conta numero de zipfiles no folder
+            
+            extracted_zipfile_count = new_zipfiles_count #atualiza variável de arquivos zip extraidos
+            print(extracted_zipfile_count)
+            time.sleep(5)  
+        driver.quit()
+
+    def __extract_zipfiles(self)->None:
+        files = os.listdir(self.DOWNLOADED_FILES_PATH)
+
+        for file in files: #loop pelos arquivos do diretório
+            if not ".zip" in file: 
+                continue
+            with zipfile.ZipFile(os.path.join(self.DOWNLOADED_FILES_PATH, file), "r") as zip_ref:
+                zip_ref.extractall(self.DOWNLOADED_FILES_PATH) #extrai arquivo zip
+        
+        new_files = os.listdir(self.DOWNLOADED_FILES_PATH)
+        for file in new_files:
+            if ".zip" in file or ".crdownload" in file:
+                os.remove(os.path.join(self.DOWNLOADED_FILES_PATH,file)) #remove os arquivos zips ou arquivos temporários do chrome
 
     def extract_year_from_link(self, link: str) -> str:
         match = re.search(r'\d{4}', link)
@@ -129,19 +186,16 @@ class UnifiedScrapper(AbstractScrapper):
 
     def data_dir_process(self, folder_path: str) -> YearDataPoint:
         print(f"Entrando na pasta: {folder_path}")
-        subfolders = [f.path for f in os.scandir(folder_path) if f.is_dir()]
-        print(f"Subpastas encontradas: {subfolders}")
+        files_list:list[str] = os.listdir(folder_path)
 
-        for subfolder in subfolders:
-            files_list = os.listdir(subfolder)
-            print(f"Arquivos encontrados na subpasta {subfolder}: {files_list}")
-            for file in files_list:
-                if file.endswith(".xlsx") and "TDI_MUNICIPIOS" in file:
-                    file_correct_path = os.path.join(subfolder, file)
+        for file in files_list:
+            if file.endswith(".xlsx") and "TDI_MUNICIPIOS" in file:
+                    file_correct_path = os.path.join(folder_path, file)
                     print(f"Processando arquivo: {file_correct_path}")
                     df = self.process_df(file_correct_path)
                     if df is not None:
                         year = self.extract_year_from_path(folder_path)
+                        print(f"path: {file_correct_path}, ano: {year}")
                         if year:
                             print(f"Criando YearDataPoint para o ano {year}")
                             return YearDataPoint(df=df, data_year=year)
@@ -155,10 +209,13 @@ class UnifiedScrapper(AbstractScrapper):
 
     def process_df(self, xlsx_file_path: str) -> pd.DataFrame:
         try:
-            df = pd.read_excel(xlsx_file_path, header=6, skiprows=[7, 8])
-            print(f"Colunas disponíveis no arquivo {xlsx_file_path}: {df.columns.tolist()}")
+            cols = ['Unnamed: 3','Unnamed: 5','Unnamed: 6','Total']
 
-            municipality_col = 'Unnamed: 4'
+            df = pd.read_excel(xlsx_file_path, header=6, skiprows=[7, 8],usecols=cols)
+            print(f"Colunas disponíveis no arquivo {xlsx_file_path}: {df.columns.tolist()}")
+            df.to_csv(f"{xlsx_file_path}.csv")
+
+            municipality_col = 'Unnamed: 3'
             total_col = 'Total'
             location_col = 'Unnamed: 5'
             admin_dependency_col = 'Unnamed: 6'
@@ -169,6 +226,9 @@ class UnifiedScrapper(AbstractScrapper):
             df_filtered = df[(df[location_col] == 'Total') & (df[admin_dependency_col] == 'Total')]
             filtered_df = df_filtered[[municipality_col, total_col]]
             print(f"Dados filtrados:\n{filtered_df.head()}")  # Exibe uma amostra dos dados filtrados
+            df = df.rename({
+                "Unnamed: 3": "codigo_municipio",
+            },axis="columns")
 
             return filtered_df
         except Exception as e:
@@ -192,7 +252,8 @@ if __name__ == "__main__":
     regex_pattern = r'https://download\.inep\.gov\.br/informacoes_estatisticas/indicadores_educacionais/\d{4}/TDI_\d{4}_MUNICIPIOS.zip'
 
     scrapper = UnifiedScrapper(url, regex_pattern)
-    year_data_points = scrapper.extract_database()
+    year_data_points:list[YearDataPoint] = scrapper.extract_database()
 
     for data_point in year_data_points:
+        data_point.df.to_csv(f"{data_point.data_year}.csv")
         print(f"Ano: {data_point.data_year}, DataFrame Shape: {data_point.df.shape}")
