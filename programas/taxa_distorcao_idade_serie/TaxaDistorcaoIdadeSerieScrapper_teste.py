@@ -1,9 +1,7 @@
 import os
 import re
 import time
-import requests
 import zipfile
-import io
 import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -102,15 +100,12 @@ class UnifiedScrapper(AbstractScrapper):
                         print("direita")
                         self.clicar_na_seta(driver, "direita")
 
-    def extract_database(self):
+    def extract_database(self)->list[YearDataPoint]:
         year_data_points = []
 
         # Extração dos links das páginas
         links = self.extrair_links()[:2]
-        self.__download_zipfiles(links) #baixa os arquivos zip localmente
-        time.sleep(5)
-        print("baixou todos os zip")
-        self.__extract_zipfiles()
+        self.__download_and_extract_zipfiles(links)
         print("extraiu todos os zipfiles")
      
         inner_folder = os.listdir(self.DOWNLOADED_FILES_PATH)
@@ -129,7 +124,6 @@ class UnifiedScrapper(AbstractScrapper):
 
         print(f"Total de YearDataPoints processados: {len(year_data_points)}")
         return year_data_points
-
 
     def __download_zipfiles(self,urls:list[str])->None:  
         downloaded_files_dir: str = self.DOWNLOADED_FILES_PATH 
@@ -180,9 +174,54 @@ class UnifiedScrapper(AbstractScrapper):
             if ".zip" in file or ".crdownload" in file:
                 os.remove(os.path.join(self.DOWNLOADED_FILES_PATH,file)) #remove os arquivos zips ou arquivos temporários do chrome
 
-    def extract_year_from_link(self, link: str) -> str:
-        match = re.search(r'\d{4}', link)
-        return match.group(0) if match else 'unknown_year'
+    def __download_and_extract_zipfiles(self,urls:list[str])->None:
+        #baixar arquivos zips
+        downloaded_files_dir: str = self.DOWNLOADED_FILES_PATH 
+        chrome_options = Options()
+        chrome_options.add_experimental_option("prefs", {
+            "download.default_directory": downloaded_files_dir,  # Set the download directory
+            "download.prompt_for_download": False,  # Disable the prompt for download
+            "download.directory_upgrade": True,  # Ensure directory upgrade
+            "safebrowsing.enabled": True  # Enable safe browsing
+        })
+
+        # Set up the Chrome driver
+        driver = webdriver.Chrome(options=chrome_options)
+        if not os.path.isdir(downloaded_files_dir):
+            os.mkdir(downloaded_files_dir)
+
+        extracted_zipfile_count:int = 0 #variavel para contar quantos zipfiles existes
+        for url in urls:
+            # Open the browser and navigate to the URL
+            driver.get(url)
+            time.sleep(5)
+
+            files_in_dir:list[str] =  os.listdir(downloaded_files_dir)
+            new_zipfiles_count:int = reduce(lambda count,filename: count+1 if ".zip" in filename else count,files_in_dir,0) #conta numero de zipfiles no folder
+
+            while new_zipfiles_count == extracted_zipfile_count: #enquanto nenhum arquivo no dir for um .zip
+                time.sleep(5)
+                files_in_dir = os.listdir(downloaded_files_dir)
+                new_zipfiles_count:int = reduce(lambda count,filename: count+1 if ".zip" in filename else count,files_in_dir,0) #conta numero de zipfiles no folder
+            
+            extracted_zipfile_count = new_zipfiles_count #atualiza variável de arquivos zip extraidos
+            print(extracted_zipfile_count)
+            time.sleep(5)  
+        driver.quit()
+    
+        #extrair arquivos zips
+        files = os.listdir(self.DOWNLOADED_FILES_PATH)
+
+        for file in files: #loop pelos arquivos do diretório
+            if not ".zip" in file: 
+                continue
+            with zipfile.ZipFile(os.path.join(self.DOWNLOADED_FILES_PATH, file), "r") as zip_ref:
+                zip_ref.extractall(self.DOWNLOADED_FILES_PATH) #extrai arquivo zip
+        
+        new_files = os.listdir(self.DOWNLOADED_FILES_PATH)
+        for file in new_files:
+            if ".zip" in file or ".crdownload" in file:
+                os.remove(os.path.join(self.DOWNLOADED_FILES_PATH,file)) #remove os arquivos zips ou arquivos temporários do chrome
 
     def data_dir_process(self, folder_path: str) -> YearDataPoint:
         print(f"Entrando na pasta: {folder_path}")
@@ -213,7 +252,6 @@ class UnifiedScrapper(AbstractScrapper):
 
             df = pd.read_excel(xlsx_file_path, header=6, skiprows=[7, 8],usecols=cols)
             print(f"Colunas disponíveis no arquivo {xlsx_file_path}: {df.columns.tolist()}")
-            df.to_csv(f"{xlsx_file_path}.csv")
 
             municipality_col = 'Unnamed: 3'
             total_col = 'Total'
@@ -226,7 +264,7 @@ class UnifiedScrapper(AbstractScrapper):
             df_filtered = df[(df[location_col] == 'Total') & (df[admin_dependency_col] == 'Total')]
             filtered_df = df_filtered[[municipality_col, total_col]]
             print(f"Dados filtrados:\n{filtered_df.head()}")  # Exibe uma amostra dos dados filtrados
-            df = df.rename({
+            filtered_df = filtered_df.rename({
                 "Unnamed: 3": "codigo_municipio",
             },axis="columns")
 
@@ -256,4 +294,4 @@ if __name__ == "__main__":
 
     for data_point in year_data_points:
         data_point.df.to_csv(f"{data_point.data_year}.csv")
-        print(f"Ano: {data_point.data_year}, DataFrame Shape: {data_point.df.shape}")
+        print(f"Ano: {data_point.data_year}, DataFrame Shape: {data_point.df.info()}")
