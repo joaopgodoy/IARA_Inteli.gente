@@ -15,14 +15,12 @@ from AbstractScrapper import AbstractScrapper
 
 class UnifiedScrapper(AbstractScrapper):
 
-    def __init__(self, url: str, regex_pattern: str):
-        self.url = url
-        self.regex_pattern = regex_pattern
-        self.files_folder_path = self._create_downloaded_files_dir()
-        print(f"Initialized UnifiedScrapper with URL: {url} and regex pattern: {regex_pattern}")
-        print(f"Files will be saved in: {self.files_folder_path}")
+    URL = "https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/indicadores-educacionais/taxas-de-distorcao-idade-serie"
 
-    def extrair_links(self):
+    def __init__(self):
+        self.files_folder_path = self._create_downloaded_files_dir()
+
+    def extrair_links(self)->list[str]:
         driver = webdriver.Chrome()
         driver.maximize_window()
         driver.get(self.url)
@@ -42,7 +40,9 @@ class UnifiedScrapper(AbstractScrapper):
         driver.quit()
 
         # Padrão regex para encontrar os links específicos
-        pattern = re.compile(self.regex_pattern)
+        regex_pattern = r'https://download\.inep\.gov\.br/informacoes_estatisticas/indicadores_educacionais/\d{4}/TDI_\d{4}_MUNICIPIOS.zip'
+
+        pattern = re.compile(regex_pattern)
         links = pattern.findall(html_content)
         print(f"Links encontrados: {links}")
 
@@ -268,6 +268,8 @@ class UnifiedScrapper(AbstractScrapper):
                 "Unnamed: 3": "codigo_municipio",
             },axis="columns")
 
+            filtered_df["codigo_municipio"] = filtered_df["codigo_municipio"].astype("int")
+
             return filtered_df
         except Exception as e:
             print(f"Erro ao processar o DataFrame: {e}")
@@ -287,9 +289,8 @@ class UnifiedScrapper(AbstractScrapper):
 
 if __name__ == "__main__":
     url = "https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/indicadores-educacionais/taxas-de-distorcao-idade-serie"
-    regex_pattern = r'https://download\.inep\.gov\.br/informacoes_estatisticas/indicadores_educacionais/\d{4}/TDI_\d{4}_MUNICIPIOS.zip'
 
-    scrapper = UnifiedScrapper(url, regex_pattern)
+    scrapper = UnifiedScrapper()
     year_data_points:list[YearDataPoint] = scrapper.extract_database()
 
     for data_point in year_data_points:
