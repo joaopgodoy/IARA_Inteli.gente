@@ -1,6 +1,7 @@
 from link_extractor import extrair_links
 import requests, zipfile, io, os
-from AbstractScrapper import EXTRACTED_FILES_DIR
+
+EXTRACTED_FILES_DIR = "extracted_files"
 
 FILES_FOLDER_PATH = os.path.join(os.getcwd(), EXTRACTED_FILES_DIR) 
 
