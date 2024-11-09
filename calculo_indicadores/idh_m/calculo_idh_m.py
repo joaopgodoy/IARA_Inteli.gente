@@ -1,6 +1,6 @@
 import pandas as pd
 from math import log
-from CalculadoraIndicador import CalculadoraIndicador
+from ..modules.modules import CalculadoraIndicador
 
 def formula(valor, min, max):
     res = ((log(valor) - log(min)) / (log(max) - log(min)))
@@ -29,4 +29,3 @@ calcula_idh = CalculadoraIndicador("idh_m",1,transforma_dataframe_idh_m,None)
 df = pd.read_csv('idh_m.csv')
 
 calcula_idh.funcao_calcula_valor(df)
-

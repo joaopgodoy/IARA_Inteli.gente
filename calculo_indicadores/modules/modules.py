@@ -1,5 +1,13 @@
-import pandas as pd
-import os
+import pandas as pd, os
+from typing import Callable
+from dataclasses import dataclass
+
+@dataclass
+class CalculadoraIndicador:
+    nome_indicador:str # nome na tabela de requisitos
+    id_indicador:int # id do indicador no BD
+    funcao_calcula_valor: Callable[[pd.DataFrame],pd.DataFrame]
+    funcao_calcula_nota: Callable
 
 class ProcessadorDeIndicadores:
     def __init__(self, pasta_dados, colunas_chave, colunas_valor, pesos, formula_calculo):
@@ -52,7 +60,6 @@ class ProcessadorDeIndicadores:
         df.to_csv(arquivo_saida, index=False)
         print(f'Arquivo consolidado salvo como {arquivo_saida}')
 
-# Defina a fórmula de pontuação como uma função
 def formula_exemplo(row, pesos):
     pontuacao = 0
     for coluna, peso in pesos.items():
@@ -60,34 +67,3 @@ def formula_exemplo(row, pesos):
         if pd.notna(valor) and valor != "Não sabe" and valor != "Não possui":
             pontuacao += valor * peso
     return pontuacao
-
-# Configuração dos parâmetros
-pasta_dados = 'dados'
-colunas_chave = ['ano', 'codigo_municipio']
-colunas_valor = ['valor']  # Nome da coluna de valor em cada CSV
-pesos = {
-    "Barco - MTRA181": 1,
-    "Metrô - MTRA182": 3,
-    "Mototáxi - MTRA183": 2,
-    "Táxi - MTRA184": 2,
-    "Trem - MTRA185": 3,
-    "Van - MTRA186": 1,
-    "Avião - MTRA187": 1,
-    "Transporte coletivo por ônibus intramunicipal - MTRA19": 3,
-    "Transporte coletivo por ônibus intermunicipal - MTRA23": 1
-}
-arquivo_saida = 'dados_unificados_com_pontuacao.csv'
-
-# Criação e uso do processador
-processador = ProcessadorDeIndicadores(
-    pasta_dados=pasta_dados,
-    colunas_chave=colunas_chave,
-    colunas_valor=colunas_valor,
-    pesos=pesos,
-    formula_calculo=formula_exemplo
-)
-
-# Carrega, processa e salva o resultado
-df_unificado = processador.carregar_csvs()
-df_com_pontuacao = processador.aplicar_formula(df_unificado)
-processador.salvar_csv(df_com_pontuacao, arquivo_saida)

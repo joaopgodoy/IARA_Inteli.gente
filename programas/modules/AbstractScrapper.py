@@ -1,12 +1,14 @@
-from abc import ABC,abstractmethod
+import os, requests, zipfile, time, re, logging
 import pandas as pd
-import os , requests , zipfile
-from DataEnums import BaseFileType
-from YearDataPoint import YearDataPoint
+from abc import ABC, abstractmethod
+from .DataEnums import BaseFileType
+from .YearDataPoint import YearDataPoint
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.chrome.options import Options
 
-
-
-
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class AbstractScrapper(ABC):
 
@@ -14,12 +16,16 @@ class AbstractScrapper(ABC):
    Essa classe fornece a interface utilizada pelas classes de webscrapping,que podem receber ou não informações sobre qual dado extrair (os parâmetros de INIT
    não são fixos e dependem de cada classe) e realizam a extração dos dado desses sites, retornando uma lista de objetos YearDataPoint. Algumas subclasses podem necessitar
    primeiro baixar os arquivos como zip e depois extrair-los, para isso métodos gerais sobre isso são implementados nessa classe abstrata.
-
    """
 
-   DOWNLOADED_FILES_DIR:str = "tempfiles" #diretório temporário para guardar os arquivos .zip e de dados extraidos
+   DOWNLOADED_FILES_DIR: str = "extracted_files" #diretório temporário para guardar os arquivos .zip e de dados extraidos
    DOWNLOADED_FILES_PATH = os.path.join(os.getcwd(),DOWNLOADED_FILES_DIR)
 
+   def __init__(self, URL, regex):
+       super().__init__()
+       self.URL = URL
+       self.regex = regex
+       self.files_folder_path = self._create_downloaded_files_dir()
 
    @abstractmethod
    def extract_database()->list[YearDataPoint]:
@@ -132,9 +138,35 @@ class AbstractScrapper(ABC):
         except Exception as e:
                print(f"falha ao deletar diretório do arquivo extraído. Erro: {e}")
 
-   def _create_downloaded_files_dir(self)->str:
-        dir_path: str = self.DOWNLOADED_FILES_PATH
+   def _create_downloaded_files_dir(self) -> str:
+        dir_path: str = os.path.join(os.getcwd(),self.DOWNLOADED_FILES_DIR)
+
         if not os.path.exists(dir_path):
             os.mkdir(dir_path)
         
         return dir_path
+   
+   def _extract_links(self) -> list[str]:
+        driver = webdriver.Chrome()
+        driver.maximize_window()
+        driver.get(self.URL)
+        time.sleep(5)
+
+        self.__close_start_popup(driver)
+
+        html_content = driver.page_source
+        driver.quit()
+
+        links = re.findall(self.regex, html_content)
+        print(f"Links encontrados: {links}")
+
+        return links
+    
+   def __close_start_popup(self, driver):
+      try:
+         actions = ActionChains(driver)
+         actions.move_by_offset(driver.execute_script("return window.innerWidth / 2;"),
+                                 driver.execute_script("return window.innerHeight / 2;")).click().perform()
+         time.sleep(2)
+      except Exception as e:
+         print(f"Erro ao clicar no centro da tela: {e}")

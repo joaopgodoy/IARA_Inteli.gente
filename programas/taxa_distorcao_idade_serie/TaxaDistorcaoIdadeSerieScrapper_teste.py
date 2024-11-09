@@ -1,66 +1,18 @@
-import os
-import re
-import time
-import zipfile
-import pandas as pd
+import os, re, time, zipfile, pandas as pd
+from functools import reduce
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.options import Options
-from functools import reduce
-from YearDataPoint import YearDataPoint
-from AbstractScrapper import AbstractScrapper
+from ..modules.YearDataPoint import YearDataPoint
+from ..modules.AbstractScrapper import AbstractScrapper
 
 class UnifiedScrapper(AbstractScrapper):
 
-    URL = "https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/indicadores-educacionais/taxas-de-distorcao-idade-serie"
-
-    def __init__(self):
-        self.files_folder_path = self._create_downloaded_files_dir()
-
-    def __extract_links(self)->list[str]:
-        driver = webdriver.Chrome()
-        driver.maximize_window()
-        driver.get(self.URL)
-
-        # Esperar um pouco para garantir que a página carregue completamente
-        driver.implicitly_wait(10)
-
-        # Fechar o pop-up inicial clicando no meio da tela
-        self.__close_start_popup(driver)
-
-        # Processar os anos desejados
-        anos = range(2023,2021,-1)
-        self.__click_on_all_years(driver, anos)
-
-        # Obter o conteúdo da página renderizada após clicar em todos os anos
-        html_content = driver.page_source
-        driver.quit()
-
-        # Padrão regex para encontrar os links específicos
-        regex_pattern = r'https://download\.inep\.gov\.br/informacoes_estatisticas/indicadores_educacionais/\d{4}/TDI_\d{4}_MUNICIPIOS.zip'
-
-        pattern = re.compile(regex_pattern)
-        links = pattern.findall(html_content)
-        print(f"Links encontrados: {links}")
-
-        return links
-
-    def __close_start_popup(self, driver):
-        try:
-            driver.implicitly_wait(5)
-            window_size = driver.get_window_size()
-            width = window_size['width']
-            height = window_size['height']
-            center_x = width / 2
-            center_y = height / 2
-            actions = ActionChains(driver)
-            actions.move_by_offset(center_x, center_y).click().perform()
-            print("Fechou o pop-up inicial clicando no meio da tela.")
-        except Exception as e:
-            print(f"Não foi possível fechar o pop-up inicial clicando no meio da tela: {e}")
+    def __init__(self, URL, regex):
+        super().__init__(URL, regex)
 
     def __click_side_arrows(self, driver, direcao):
         if direcao == "esquerda":
@@ -104,8 +56,8 @@ class UnifiedScrapper(AbstractScrapper):
         year_data_points = []
 
         # Extração dos links das páginas
-        links = self.__extract_links()[:2]
-        self.__download_and_extract_zipfiles(links)
+        links = self._extract_links()
+        self._download_and_extract_zipfiles(links)
         print("extraiu todos os zipfiles")
      
         inner_folder = os.listdir(self.DOWNLOADED_FILES_PATH)
@@ -125,7 +77,7 @@ class UnifiedScrapper(AbstractScrapper):
         print(f"Total de YearDataPoints processados: {len(year_data_points)}")
         return year_data_points
 
-    def __download_and_extract_zipfiles(self,urls:list[str])->None:
+    def _download_and_extract_zipfiles(self,urls:list[str])->None:
         #baixar arquivos zips
         downloaded_files_dir: str = self.DOWNLOADED_FILES_PATH 
         chrome_options = Options()
@@ -227,20 +179,11 @@ class UnifiedScrapper(AbstractScrapper):
             print(f"Erro ao processar o DataFrame: {e}")
             return None
 
-    def __extract_year_from_path(self, path: str) -> int:
-        print(f"Extraindo ano do caminho: {path}")
-        ano_match = re.search(r'\d{4}', path)
-        if ano_match:
-            year = int(ano_match.group(0))
-            print(f"Ano extraído: {year}")
-            return year
-        else:
-            print("Falha ao extrair o ano.")
-            return None
-
-
 if __name__ == "__main__":
-    scrapper = UnifiedScrapper()
+    URL = "https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/indicadores-educacionais/taxas-de-distorcao-idade-serie"
+    REGEX_PATTERN = r'https://download\.inep\.gov\.br/informacoes_estatisticas/indicadores_educacionais/\d{4}/TDI_\d{4}_MUNICIPIOS.zip'
+    
+    scrapper = UnifiedScrapper(URL, REGEX_PATTERN)
     year_data_points:list[YearDataPoint] = scrapper.extract_database()
 
     for data_point in year_data_points:
