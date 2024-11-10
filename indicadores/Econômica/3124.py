@@ -7,4 +7,4 @@ with open(ECON_FILE, "r") as json_file:
 process = processor.from_json(daqta_list['3124'])
 
 # Carrega, processa e salva o resultado
-process.process_dataframe()
+process.process_dataframe(weights=process.pesos)

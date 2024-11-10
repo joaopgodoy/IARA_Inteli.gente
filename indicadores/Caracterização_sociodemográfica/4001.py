@@ -11,6 +11,8 @@ def df_transform(df):
     # Mesclar os valores mínimos e máximos no DataFrame original
     df = df.merge(min_max_por_ano, on='ano', how='left')
 
+    return df
+
 with open(SOCIODEM_FILE, "r") as arquivo_json:
     lista_dados = json.load(arquivo_json)
 

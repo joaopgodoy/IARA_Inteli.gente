@@ -94,13 +94,10 @@ class processor:
         if drop_columns is None:
             drop_columns = []
 
-        if not kwargs: 
-            kwargs['weights'] = self.pesos
-
         unified_df = self.load_csvs()
 
         if process_function:
-            process_function(unified_df)
+            unified_df = process_function(unified_df)
 
         score_df = self.get_processed_dataframe(unified_df, **kwargs).drop(columns=drop_columns)
         self.save_csv(score_df)

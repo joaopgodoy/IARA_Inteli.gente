@@ -7,4 +7,4 @@ with open(SOCIOCUL_FILE, "r") as arquivo_json:
 process = processor.from_json(lista_dados['3007'])
 
 # Carrega, processa e salva o resultado
-process.process_dataframe()
+process.process_dataframe(weights=process.pesos)
