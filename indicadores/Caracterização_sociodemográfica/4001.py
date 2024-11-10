@@ -14,7 +14,7 @@ def df_transform(df):
 with open(SOCIODEM_FILE, "r") as arquivo_json:
     lista_dados = json.load(arquivo_json)
 
-process = processor.from_json(lista_dados['4001'])
+process = processor.from_json(lista_dados['4001'], equation=equation)
 
 # Carrega, processa e salva o resultado
 process.process_dataframe(process_function=df_transform, drop_columns=['min', 'max'])
