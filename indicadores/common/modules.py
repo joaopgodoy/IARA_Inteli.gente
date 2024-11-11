@@ -15,7 +15,7 @@ def weighted_sum(row, weights) -> int:
     return total
 
 class processor:
-    def __init__(self, dados, colunas_chave, colunas_valor, pesos, formula_calculo=weighted_sum) -> None:
+    def __init__(self, pesos, dados, colunas_chave, colunas_valor, arquivo_saida, formula_calculo=weighted_sum) -> None:
         """
         Inicializa o processador com:
         - dados: diretório onde os arquivos CSV estão localizados
@@ -27,6 +27,7 @@ class processor:
         self.dados = dados
         self.colunas_chave = colunas_chave
         self.colunas_valor = colunas_valor
+        self.arquivo_saida = arquivo_saida
         self.pesos = pesos
         self.formula_calculo = formula_calculo
 
@@ -36,10 +37,11 @@ class processor:
     @classmethod
     def from_json(cls, json_object: json, equation = None) -> object:
         new_instance = cls(
-            dados = json_object.get('dados'),
-            colunas_chave = json_object.get('colunas_chave'),
-            colunas_valor = json_object.get('colunas_valor'),
-            pesos = json_object.get('pesos'),
+            dados = json_object.get('dados', 'dados'),
+            colunas_chave = json_object.get('colunas_chave', ["ano", "codigo_municipio"]),
+            colunas_valor = json_object.get('colunas_valor', ["valor"]),
+            arquivo_saida=json_object.get('arquivo_saida', 'processed_data.csv'),
+            pesos = json_object.get('pesos')
         )
 
         if equation is not None:
@@ -75,11 +77,11 @@ class processor:
         
         return df_unificado
             
-    def save_csv(self, df: pd.DataFrame, return_file_name: str = 'processed_data.csv') -> None:
+    def save_csv(self, df: pd.DataFrame) -> None:
         """Salva o dataframe final em um arquivo CSV."""
-        df.to_csv(return_file_name, index=False)
+        df.to_csv(self.arquivo_saida, index=False)
 
-        print(f'Arquivo consolidado salvo como {return_file_name}')
+        print(f'Arquivo consolidado salvo como {self.arquivo_saida}')
 
     def get_processed_column(self, df: pd.DataFrame, **kwargs) -> pd.Series | pd.DataFrame:
         return df.apply(self.formula_calculo, axis=1, **kwargs)

@@ -1,8 +1,5 @@
 {
     "3124": {
-        "dados": "dados",
-        "colunas_chave": ["ano", "codigo_municipio"],
-        "colunas_valor": ["valor"],
         "pesos": {
             "Barco - MTRA181": 1,
             "Metrô - MTRA182": 3,
@@ -13,7 +10,6 @@
             "Avião - MTRA187": 1,
             "Transporte coletivo por ônibus intramunicipal - MTRA19": 3,
             "Transporte coletivo por ônibus intermunicipal - MTRA23": 1
-        },
-        "arquivo_saida": "dados_unificados_com_pontuacao.csv"
+        }
     }
 }
