@@ -1,22 +1,7 @@
 import pandas as pd, os, json
 
-ENVIRONMENT_FILE = 'indicadores/Meio_Ambiente/environ.json'
-ECON_FILE = 'indicadores/Econômica/econ.json'
-SOCIOCUL_FILE = 'indicadores/Sociocultural/sociocul.json'
-SOCIODEM_FILE = 'indicadores/Caracterização_sociodemográfica/sociodem.json'
-
-def weighted_sum(row, weights) -> int:
-    total = 0
-
-    for coluna, weight in weights.items():
-        valor = row.get(coluna, 0)
-        if pd.notna(valor) and valor not in ["Não sabe", "Não possui"]:
-            total += valor * weight
-            
-    return total
-
 class processor:
-    def __init__(self, pesos, dados, colunas_chave, colunas_valor, arquivo_saida, formula_calculo=weighted_sum) -> None:
+    def __init__(self, pesos, dados, colunas_chave, colunas_valor, arquivo_saida, formula_calculo) -> None:
         """
         Inicializa o processador com:
         - dados: diretório onde os arquivos CSV estão localizados
@@ -42,10 +27,9 @@ class processor:
             colunas_chave = json_object.get('colunas_chave', ["ano", "codigo_municipio"]),
             colunas_valor = json_object.get('colunas_valor', ["valor"]),
             arquivo_saida=json_object.get('arquivo_saida', 'processed_data.csv'),
-            pesos = json_object.get('pesos')
+            pesos = json_object.get('pesos'),
+            formula_calculo = score if score != 'coluna' else lambda row: row[json_object.get(score)]
         )
-
-        new_instance.formula_calculo = score if score != 'coluna' else lambda row: row[json_object.get(score)]
 
         return new_instance
     

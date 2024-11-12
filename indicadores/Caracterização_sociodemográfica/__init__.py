@@ -1,2 +1,3 @@
 import json
-from ..common.modules import processor, SOCIODEM_FILE, weighted_sum
+from ..common.processor import processor
+from ..common.constant_names import SOCIODEM_FILE

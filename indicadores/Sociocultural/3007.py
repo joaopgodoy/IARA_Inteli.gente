@@ -1,4 +1,5 @@
 from . import *
+from..common.functions import weighted_sum
 
 with open(SOCIOCUL_FILE, "r") as arquivo_json:
     lista_dados = json.load(arquivo_json)
