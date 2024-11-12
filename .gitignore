@@ -1,1 +1,5 @@
-/env_test
+# Ignore all csv files on main folder.
+*.csv
+
+# Ignore the main data folder.
+/dados
