@@ -3,3 +3,5 @@
 
 # Ignore the main data folder.
 /dados
+
+test.py

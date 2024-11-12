@@ -1,5 +1,11 @@
 {
+    "3087": {
+        "coluna": "PIB per capita"
+    },
     "4001": {
-        "dados": "idh-m.csv"
+        "coluna": "idh-m"
+    },
+    "4056": {
+        "coluna": "PIB Agropecuária"
     }
 }

@@ -1,5 +1,6 @@
 import pandas as pd, os, json
 
+ENVIRONMENT_FILE = 'indicadores/Meio_Ambiente/environ.json'
 ECON_FILE = 'indicadores/Econômica/econ.json'
 SOCIOCUL_FILE = 'indicadores/Sociocultural/sociocul.json'
 SOCIODEM_FILE = 'indicadores/Caracterização_sociodemográfica/sociodem.json'
@@ -35,7 +36,7 @@ class processor:
         return f"Dados: {self.dados}\nColunas chave: {self.colunas_chave}\nColunas valor: {self.colunas_valor}\nPesos: {self.pesos}\nFormula: {self.formula_calculo}"
 
     @classmethod
-    def from_json(cls, json_object: json, equation = None) -> object:
+    def from_json(cls, json_object: json, score = 'coluna') -> object:
         new_instance = cls(
             dados = json_object.get('dados', 'dados'),
             colunas_chave = json_object.get('colunas_chave', ["ano", "codigo_municipio"]),
@@ -44,8 +45,7 @@ class processor:
             pesos = json_object.get('pesos')
         )
 
-        if equation is not None:
-            new_instance.formula_calculo = equation
+        new_instance.formula_calculo = score if score != 'coluna' else lambda row: row[json_object.get(score)]
 
         return new_instance
     
@@ -74,17 +74,18 @@ class processor:
         df_unificado = dataframes[0]
         for df in dataframes[1:]:
             df_unificado = pd.merge(df_unificado, df, on=self.colunas_chave, how="outer")
-        
+
         return df_unificado
             
     def save_csv(self, df: pd.DataFrame) -> None:
         """Salva o dataframe final em um arquivo CSV."""
+        df = df[self.colunas_chave + ['score']]
         df.to_csv(self.arquivo_saida, index=False)
 
         print(f'Arquivo consolidado salvo como {self.arquivo_saida}')
 
     def get_processed_column(self, df: pd.DataFrame, **kwargs) -> pd.Series | pd.DataFrame:
-        return df.apply(self.formula_calculo, axis=1, **kwargs)
+        return df.apply(self.formula_calculo, axis=1, **kwargs).fillna(0)
 
     def get_processed_dataframe(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
         """Aplica a fórmula de cálculo de pontuação para cada linha do dataframe."""
