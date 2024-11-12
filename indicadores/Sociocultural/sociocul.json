@@ -9,5 +9,29 @@
             "Sistema de alerta antecipado de desastres decorrente de enchentes, inundações ou enxurradas - MGRD186": 1,
             "Sistema de alerta antecipado de desastres de defesa civil - MGRD2213": 1
         }
+    },
+    "3011": {
+        "nome": "Taxa de analfabetismo",
+        "coluna": "Taxa de analfabetismo "
+    },
+    "3086": {
+        "nome": "Índice de desenvolvimento da educação básica (IDEB) - anos finais",
+        "coluna": "Índice de desenvolvimento da educação básica (IDEB) - anos finais "
+    },
+    "3095": {
+        "nome": "Leitos hospitalares na rede pública municipal",
+        "coluna": "Leitos hospitalares na rede pública municipal"
+    },
+    "4021": {
+        "nome": "Índice de risco e proteção à saúde dos nascidos vivos",
+        "coluna": "Índice de risco e proteção à saúde dos nascidos vivos "
+    },
+    "4049": {
+        "nome": "Mortalidade materna",
+        "coluna": "obitos maternos"
+    },
+    "4069": {
+        "nome": "Drenagem urbana e manejo de águas pluviais",
+        "coluna": "PO007 - Drenagem urbana e manejo de águas pluviais"
     }
 }
