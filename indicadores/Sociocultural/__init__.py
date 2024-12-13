@@ -1,3 +1,3 @@
 import json
 from ..common.processor import processor
-from ..common.constant_names import SOCIOCUL_FILE
+from ..common.constants import SOCIOCUL_FILE
