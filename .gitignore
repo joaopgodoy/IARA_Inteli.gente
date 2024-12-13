@@ -1,9 +1,13 @@
 # Ignore all csv files on main folder.
 *.csv
 
+*.zip
+
 # Ignore the main data folder.
 /dados
-/calculo_indicadores
-/extracted_files
-/programas
+
 test.py
+
+/*/*/__pycache__/
+
+/*/__pycache__/
