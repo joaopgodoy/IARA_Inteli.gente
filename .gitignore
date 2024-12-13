@@ -5,6 +5,9 @@
 
 # Ignore the main data folder.
 /dados
+/calculo_indicadores
+/extracted_files
+/programas
 
 test.py
 
