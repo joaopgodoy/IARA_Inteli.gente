@@ -1,5 +1,5 @@
-from. import *
-from..common.functions import weighted_sum
+from . import *
+from ..common.functions import weighted_sum
 
 with open(ECON_FILE, "r") as json_file:
     data_list = json.load(json_file)

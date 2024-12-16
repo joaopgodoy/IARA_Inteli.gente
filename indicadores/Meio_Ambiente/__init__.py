@@ -1,3 +1,3 @@
 import json
 from ..common.processor import processor
-from ..common.constant_names import ENVIRONMENT_FILE
+from ..common.constants import ENVIRONMENT_FILE
