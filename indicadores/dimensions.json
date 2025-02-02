@@ -1,0 +1,129 @@
+{
+    "environ": {
+        "3024": {
+            "nome": "Índice de volume de esgoto coletado",
+            "coluna": "IN015_AE - Índice de coleta de esgoto"
+        },
+        "3028": {
+            "nome": "Consumo médio per capita de água" ,
+            "coluna": "IN022_AE - Consumo médio percapita de água"
+        },
+        "3110": {
+            "nome": "Índice de perdas na distribuição de água ",
+            "coluna": "IN049_AE - Índice de perdas na distribuição"
+        },
+        "4007": {
+            "nome": "Percentual de material recolhido pela coleta seletiva",
+            "coluna": "IN053_RS - Taxa de material recolhido pela coleta seletiva (exceto mat. orgânica) em relação à quantidade total coletada de resíduos sólidos domésticos"
+        },
+        "4047": {
+            "nome": "Índice de volume de esgoto tratado",
+            "coluna": "IN016_AE - Índice de tratamento de esgoto"
+        },
+        "4070": {
+            "nome": "Plano municipal de saneamento básico",
+            "coluna": "PO028 - Existência do plano municipal de saneamento básico"
+        },
+        "4071": {
+            "nome": "Índice de volume de água tratada importado"
+        }
+    },
+
+    "sociocul": {
+        "3007": {
+            "pesos": {
+                "Cadastro de risco - MGRD187": 1,
+                "Coordenação municipal de proteção e defesa civil - MGRD212": 1,
+                "Mapeamentos de áreas de risco de enchentes ou inundações - MGRD201": 1,
+                "Mecanismos de controle e fiscalização para evitar ocupação em áreas suscetíveis aos desastres - MGRD183": 1,
+                "Sistema de alerta antecipado de desastre decorrente de escorregamento ou deslizamento de encosta - MGRD206": 1,
+                "Sistema de alerta antecipado de desastres decorrente de enchentes, inundações ou enxurradas - MGRD186": 1,
+                "Sistema de alerta antecipado de desastres de defesa civil - MGRD2213": 1
+            }
+        },
+        "3011": {
+            "nome": "Taxa de analfabetismo",
+            "coluna": "Taxa de analfabetismo "
+        },
+        "3086": {
+            "nome": "Índice de desenvolvimento da educação básica (IDEB) - anos finais",
+            "coluna": "Índice de desenvolvimento da educação básica (IDEB) - anos finais "
+        },
+        "3095": {
+            "nome": "Leitos hospitalares na rede pública municipal",
+            "coluna": "Leitos hospitalares na rede pública municipal"
+        },
+        "4021": {
+            "nome": "Índice de risco e proteção à saúde dos nascidos vivos",
+            "coluna": "Índice de risco e proteção à saúde dos nascidos vivos "
+        },
+        "4049": {
+            "nome": "Mortalidade materna",
+            "coluna": "obitos maternos"
+        },
+        "4069": {
+            "nome": "Drenagem urbana e manejo de águas pluviais",
+            "coluna": "PO007 - Drenagem urbana e manejo de águas pluviais"
+        }
+    },
+
+    "econ": {
+        "3021": {
+            "nome": "Escala de acesso a banda larga fixa ",
+            "coluna": "Escala de acesso a banda larga fixa"
+        },
+        "3022": {
+            "nome": "Escala de acesso a banda larga móvel ",
+            "coluna": "Escala de acesso a banda larga móvel"
+        },
+        "3027": {
+            "nome": "Taxa da população coberta com serviço de coleta de resíduos",
+            "coluna": "IN015_RS - Taxa de cobertura do serviço de coleta de resíduo doméstico em relação à população total do município"
+        },
+        "3117": {
+            "nome": "Índice da população total com atendimento de água ",
+            "coluna": "IN055_AE - Índice de atendimento total de água"
+        },
+        "3122": {
+            "nome": "Coleta seletiva de resíduos no município",
+            "coluna": "CS001 - Existe coleta seletiva formalizada pela prefeitura no município_"
+        },
+        "3124": {
+            "nome": "Serviços regulares de transporte de passageiros",
+            "pesos": {
+                "Barco - MTRA181": 1,
+                "Metrô - MTRA182": 3,
+                "Mototáxi - MTRA183": 2,
+                "Táxi - MTRA184": 2,
+                "Trem - MTRA185": 3,
+                "Van - MTRA186": 1,
+                "Avião - MTRA187": 1,
+                "Transporte coletivo por ônibus intramunicipal - MTRA19": 3,
+                "Transporte coletivo por ônibus intermunicipal - MTRA23": 1
+            }
+        },
+        "3127": {
+            "nome": "Índice da população total com atendimento de esgoto ",
+            "coluna": "IN056_AE - Índice de atendimento total de esgoto referido aos municípios atendidos com água"
+        }, 
+        "3141": {
+            "nome": "Índice da população urbana com atendimento de esgoto",
+            "coluna": "IN024_AE - Índice de atendimento urbano de esgoto referido aos municípios atendidos com água"
+        }
+    },
+    
+    "sociodem": {
+        "3087": {
+            "nome": "PIB per capita do município",
+            "coluna": "PIB per capita"
+        },
+        "4001": {
+            "nome": "Índice de desenvolvimento humano do município (IDH-M)",
+            "coluna": "idh-m"
+        },
+        "4056": {
+            "nome": "PIB Agropecuária",
+            "coluna": "PIB Agropecuária"
+        }
+    }
+}

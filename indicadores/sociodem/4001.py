@@ -12,10 +12,10 @@ def df_transform(df):
 
     return df
 
-with open(SOCIODEM_FILE, "r") as arquivo_json:
-    lista_dados = json.load(arquivo_json)
+class SD_4001(processor):
 
-process = processor.from_json(lista_dados['4001'], score=equation)
+    def __init__(self, data_list):
+        super().__init__(data_list['4001'])
 
-# Carrega, processa e salva o resultado
-process.process_dataframe(process_function=df_transform, drop_columns=['min', 'max'])
+    def execute_processing(self):
+        self.process_dataframe(process_function=df_transform, drop_columns=['min', 'max'])

@@ -1,38 +1,20 @@
 import pandas as pd, os, json
 
 class processor:
-    def __init__(self, pesos, dados, colunas_chave, colunas_valor, arquivo_saida, formula_calculo) -> None:
-        """
-        Inicializa o processador com:
-        - dados: diretório onde os arquivos CSV estão localizados
-        - colunas_chave: lista das colunas comuns para união dos CSVs (ex: ['ano', 'codigo_municipio'])
-        - colunas_valor: lista das colunas a serem renomeadas em cada CSV (nome de cada indicador)
-        - pesos: dicionário com os pesos de cada coluna de valor
-        - formula_calculo: função que calcula a pontuação com base nos valores das colunas e pesos
-        """
-        self.dados = dados
-        self.colunas_chave = colunas_chave
-        self.colunas_valor = colunas_valor
-        self.arquivo_saida = arquivo_saida
-        self.pesos = pesos
-        self.formula_calculo = formula_calculo
+    def __init__(self, json_object: json, score = 'coluna') -> None:
+        self.dados = json_object.get('dados', 'dados')
+        self.colunas_chave = json_object.get('colunas_chave', ["ano", "codigo_municipio"])
+        self.colunas_valor = json_object.get('colunas_valor', ["valor"])
+        self.arquivo_saida = json_object.get('nome', 'processed_data') + '.csv'
+        self.pesos = json_object.get('pesos')
+        self.formula_calculo = score if score != 'coluna' else lambda row: row[json_object.get(score)]
 
     def __str__(self):
         return f"Dados: {self.dados}\nColunas chave: {self.colunas_chave}\nColunas valor: {self.colunas_valor}\nPesos: {self.pesos}\nFormula: {self.formula_calculo}"
-
-    @classmethod
-    def from_json(cls, json_object: json, score = 'coluna') -> object:
-        new_instance = cls(
-            dados = json_object.get('dados', 'dados'),
-            colunas_chave = json_object.get('colunas_chave', ["ano", "codigo_municipio"]),
-            colunas_valor = json_object.get('colunas_valor', ["valor"]),
-            arquivo_saida=json_object.get('arquivo_saida', 'processed_data.csv'),
-            pesos = json_object.get('pesos'),
-            formula_calculo = score if score != 'coluna' else lambda row: row[json_object.get(score)]
-        )
-
-        return new_instance
     
+    def execute_processing(self):
+        self.process_dataframe()
+
     def load_csvs(self) -> pd.DataFrame:
         """Carrega e processa todos os CSVs na pasta, unindo-os em um único dataframe ou retorna o único .csv especificado."""
         if not os.path.isdir(self.dados):
@@ -77,7 +59,7 @@ class processor:
 
         return df
     
-    def process_dataframe(self, process_function = None, drop_columns: list = None, **kwargs) -> None:
+    def process_dataframe(self, curr_df = None, process_function = None, drop_columns: list = None, **kwargs) -> None:
         if drop_columns is None:
             drop_columns = []
 
