@@ -1,5 +1,6 @@
 from . import *
 from math import log
+import pandas as pd
 
 def equation(row):
     return ((log(row['idh-m']) - log(row['min'])) / (row['max'] - row['min']))
@@ -17,5 +18,9 @@ class SD_4001(processor):
     def __init__(self, data_list):
         super().__init__(data_list['4001'])
 
-    def execute_processing(self):
-        self.process_dataframe(process_function=df_transform, drop_columns=['min', 'max'])
+    def execute_processing(self, curr_df: pd.DataFrame = None):
+        return self.process_dataframe(
+            curr_df=curr_df,
+            process_function=df_transform,
+            drop_columns=['min', 'max']
+        )

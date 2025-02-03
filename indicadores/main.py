@@ -38,37 +38,46 @@ def carregar_modulo(data_list, caminho):
 
     return None
 
-def executar_indicador(data_list, caminho, save_flag, curr_df, columns=[]):
+def executar_indicador(data_list, caminho, curr_df, columns):
     modulo = carregar_modulo(data_list, caminho)
     
     try:
         curr_df = modulo.execute_processing(curr_df=curr_df)
         columns.append(modulo.nome)
 
-        if save_flag:
-            modulo.save_csv(curr_df, columns=columns)
-
-        return curr_df
+        return curr_df, columns
 
     except Exception as processingError:
         print(processingError)
 
-        return None
+        return None, None
 
 if __name__ == "__main__":
     with open("indicadores/dimensions.json", "r") as json_file:
         data_list = json.load(json_file)
 
-        initial_df = None
+        initial_df, columns = None, []
 
         if len(sys.argv) < 2:
-            print("Uso: python3 main.py dir1/ind1.py [dir2/ind3.py ...]")
-            sys.exit(1)
+            padrao = re.compile(r"^\d{4}\.py$")
 
-        for idx, caminho in enumerate(sys.argv[1:]):
-            initial_df = executar_indicador(
-                data_list=data_list,
-                caminho=caminho,
-                save_flag=(idx == len(sys.argv) - 2),
-                curr_df=initial_df
-            )
+            for subdir, dirs, files in os.walk('indicadores/'):
+                for file in files:
+                    if padrao.match(file):
+                        initial_df, columns = executar_indicador(
+                            data_list=data_list,
+                            caminho=f"{subdir}/{file}",
+                            curr_df=initial_df,
+                            columns=columns
+                        )
+
+        else:
+            for idx, caminho in enumerate(sys.argv[1:]):
+                initial_df, columns = executar_indicador(
+                    data_list=data_list,
+                    caminho=caminho,
+                    curr_df=initial_df,
+                    columns=columns
+                )
+
+        processor.save_csv(df=initial_df, columns=columns)
