@@ -16,11 +16,10 @@ def df_transform(df):
 class SD_4001(processor):
 
     def __init__(self, data_list):
-        super().__init__(data_list['4001'])
+        super().__init__(data_list['4001'], score=equation)
 
     def execute_processing(self, curr_df: pd.DataFrame = None):
         return self.process_dataframe(
             curr_df=curr_df,
-            process_function=df_transform,
-            drop_columns=['min', 'max']
+            process_function=df_transform
         )

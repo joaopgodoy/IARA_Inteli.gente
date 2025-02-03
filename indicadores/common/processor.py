@@ -7,7 +7,8 @@ class processor:
         self.dados = json_object.get('dados', 'dados')
         self.colunas_valor = json_object.get('colunas_valor', ["valor"])
         self.pesos = json_object.get('pesos')
-        self.formula_calculo = score if score != 'coluna' else lambda row: row[json_object.get(score)]
+        self.coluna_origem = json_object.get('coluna', 'coluna')
+        self.formula_calculo = score if score != 'coluna' else lambda row: row[json_object.get('coluna')]
 
     def __str__(self):
         return f"Dados: {self.dados}\nColunas valor: {self.colunas_valor}\nPesos: {self.pesos}\nFormula: {self.formula_calculo}"
@@ -49,14 +50,13 @@ class processor:
 
         return df
     
-    def process_dataframe(self, curr_df = None, process_function = None, drop_columns: list = None, **kwargs) -> None:
-        drop_columns = [] if drop_columns is None else drop_columns
+    def process_dataframe(self, curr_df = None, process_function = None, **kwargs) -> None:
         curr_df = self.load_csvs() if curr_df is None else curr_df
 
         if process_function:
             curr_df = process_function(curr_df)
 
-        return self.get_processed_dataframe(df=curr_df, **kwargs).drop(columns=drop_columns)
+        return self.get_processed_dataframe(df=curr_df, **kwargs)
     
     @classmethod
     def save_csv(self, df: pd.DataFrame, columns: list = None) -> None:

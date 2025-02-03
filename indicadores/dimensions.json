@@ -1,7 +1,7 @@
 {
     "econ": {
         "3021": {
-            "nome": "Escala de acesso a banda larga fixa ",
+            "nome": "Escala de acesso a banda larga fixa",
             "coluna": "Escala de acesso a banda larga fixa"
         },
         "3022": {
@@ -13,7 +13,7 @@
             "coluna": "IN015_RS - Taxa de cobertura do serviço de coleta de resíduo doméstico em relação à população total do município"
         },
         "3117": {
-            "nome": "Índice da população total com atendimento de água ",
+            "nome": "Índice da população total com atendimento de água",
             "coluna": "IN055_AE - Índice de atendimento total de água"
         },
         "3122": {
