@@ -25,7 +25,6 @@ def carregar_modulo(data_list, caminho):
     dimension = extract_dimension_from_path(caminho=caminho)
     json_obj = data_list[dimension]
 
-
     nome_modulo = caminho.replace("/", ".").replace(".py", "")
 
     spec = importlib.util.spec_from_file_location(nome_modulo, caminho_absoluto)
@@ -39,21 +38,37 @@ def carregar_modulo(data_list, caminho):
 
     return None
 
-def executar_indicador(data_list, caminho):
+def executar_indicador(data_list, caminho, save_flag, curr_df, columns=[]):
     modulo = carregar_modulo(data_list, caminho)
     
     try:
-        modulo.execute_processing()
-    except Exception as error:
-        print(error)
+        curr_df = modulo.execute_processing(curr_df=curr_df)
+        columns.append(modulo.nome)
+
+        if save_flag:
+            modulo.save_csv(curr_df, columns=columns)
+
+        return curr_df
+
+    except Exception as processingError:
+        print(processingError)
+
+        return None
 
 if __name__ == "__main__":
     with open("indicadores/dimensions.json", "r") as json_file:
         data_list = json.load(json_file)
 
+        initial_df = None
+
         if len(sys.argv) < 2:
             print("Uso: python3 main.py dir1/ind1.py [dir2/ind3.py ...]")
             sys.exit(1)
 
-        for caminho in sys.argv[1:]:
-            executar_indicador(data_list, caminho)
+        for idx, caminho in enumerate(sys.argv[1:]):
+            initial_df = executar_indicador(
+                data_list=data_list,
+                caminho=caminho,
+                save_flag=(idx == len(sys.argv) - 2),
+                curr_df=initial_df
+            )

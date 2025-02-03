@@ -1,19 +1,21 @@
 import pandas as pd, os, json
 
 class processor:
+
     def __init__(self, json_object: json, score = 'coluna') -> None:
+        self.nome = json_object.get('nome', 'processed_data').strip().replace(' ', '_')
         self.dados = json_object.get('dados', 'dados')
         self.colunas_chave = json_object.get('colunas_chave', ["ano", "codigo_municipio"])
         self.colunas_valor = json_object.get('colunas_valor', ["valor"])
-        self.arquivo_saida = json_object.get('nome', 'processed_data') + '.csv'
         self.pesos = json_object.get('pesos')
         self.formula_calculo = score if score != 'coluna' else lambda row: row[json_object.get(score)]
+        self.arquivo_saida = f"{self.nome}.csv"
 
     def __str__(self):
         return f"Dados: {self.dados}\nColunas chave: {self.colunas_chave}\nColunas valor: {self.colunas_valor}\nPesos: {self.pesos}\nFormula: {self.formula_calculo}"
     
-    def execute_processing(self):
-        self.process_dataframe()
+    def execute_processing(self, curr_df: pd.DataFrame = None):
+        return self.process_dataframe(curr_df)
 
     def load_csvs(self) -> pd.DataFrame:
         """Carrega e processa todos os CSVs na pasta, unindo-os em um único dataframe ou retorna o único .csv especificado."""
@@ -42,31 +44,25 @@ class processor:
             df_unificado = pd.merge(df_unificado, df, on=self.colunas_chave, how="outer")
 
         return df_unificado
-            
-    def save_csv(self, df: pd.DataFrame) -> None:
-        """Salva o dataframe final em um arquivo CSV."""
-        df = df[self.colunas_chave + ['score']]
-        df.to_csv(self.arquivo_saida, index=False)
-
-        print(f'Arquivo consolidado salvo como {self.arquivo_saida}')
-
-    def get_processed_column(self, df: pd.DataFrame, **kwargs) -> pd.Series | pd.DataFrame:
-        return df.apply(self.formula_calculo, axis=1, **kwargs).fillna(0)
 
     def get_processed_dataframe(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
         """Aplica a fórmula de cálculo de pontuação para cada linha do dataframe."""
-        df['score'] = self.get_processed_column(df, **kwargs)
+        df[self.nome] = df.apply(self.formula_calculo, axis=1, **kwargs).fillna(0)
 
         return df
     
     def process_dataframe(self, curr_df = None, process_function = None, drop_columns: list = None, **kwargs) -> None:
-        if drop_columns is None:
-            drop_columns = []
-
-        unified_df = self.load_csvs()
+        drop_columns = [] if drop_columns is None else drop_columns
+        curr_df = self.load_csvs() if curr_df is None else curr_df
 
         if process_function:
             unified_df = process_function(unified_df)
 
-        score_df = self.get_processed_dataframe(unified_df, **kwargs).drop(columns=drop_columns)
-        self.save_csv(score_df)
+        return self.get_processed_dataframe(df=unified_df, **kwargs).drop(columns=drop_columns)
+    
+    def save_csv(self, df: pd.DataFrame, columns: list = None) -> None:
+        """Salva o dataframe final em um arquivo CSV."""
+        columns = [] if columns is None else columns
+        df.to_csv(self.arquivo_saida, columns=self.colunas_chave + columns, index=False)
+
+        print(f'File saved as {self.arquivo_saida} successfully.')
