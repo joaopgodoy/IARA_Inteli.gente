@@ -7,7 +7,7 @@ class processor:
         self.dados = json_object.get('dados', 'dados')
         self.colunas_valor = json_object.get('colunas_valor', ["valor"])
         self.pesos = json_object.get('pesos')
-        self.coluna_origem = json_object.get('coluna', 'coluna')
+        self.coluna_origem = json_object.get('coluna', None)
         self.formula_calculo = score if score != 'coluna' else lambda row: row[json_object.get('coluna')]
 
     def __str__(self):

@@ -1,9 +1,9 @@
 from . import *
-from math import log
+from numpy import log
 import pandas as pd
 
 def equation(row):
-    return ((log(row['idh-m']) - log(row['min'])) / (row['max'] - row['min']))
+    return ((log(row['idh-m']) - log(row['min'])) / (log(row['max']) - log(row['min'])))
 
 def df_transform(df):
     min_max_por_ano = df.groupby('ano')['idh-m'].agg(['min', 'max']).reset_index()
