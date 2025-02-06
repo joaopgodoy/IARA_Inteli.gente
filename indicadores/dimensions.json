@@ -38,9 +38,17 @@
             "nome": "Índice da população total com atendimento de esgoto ",
             "coluna": "IN056_AE - Índice de atendimento total de esgoto referido aos municípios atendidos com água"
         }, 
+        "3139": {
+            "nome": "Índice de arborização de vias públicas",
+            "coluna": "Domicílios particulares permanentes urbanos com Existência de arborização de vias públicas"
+        },
         "3141": {
             "nome": "Índice da população urbana com atendimento de esgoto",
             "coluna": "IN024_AE - Índice de atendimento urbano de esgoto referido aos municípios atendidos com água"
+        },
+        "3145": {
+            "nome": "Índice de iluminação de vias públicas",
+            "coluna": "Domicílios particulares permanentes urbanos com Existência de iluminação pública no entorno"
         }
     },
 
@@ -125,6 +133,14 @@
         "4056": {
             "nome": "PIB Agropecuária",
             "coluna": "PIB Agropecuária"
+        },
+        "4057": {
+            "nome": "PIB Indústria",
+            "coluna": "PIBINDUST"
+        },
+        "4058": {
+            "nome": "PIB Serviços",
+            "coluna": "PIBSERVIC"
         }
     }
 }
