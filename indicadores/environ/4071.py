@@ -6,7 +6,7 @@ def equation(row):
     except ZeroDivisionError:
 	    return 0
     
-class EN_3028(processor):
+class EN_4071(processor):
 
     def __init__(self, data_list):
-        super().__init__(data_list['3028'], score=equation)
+        super().__init__(data_list['4071'], score=equation)
