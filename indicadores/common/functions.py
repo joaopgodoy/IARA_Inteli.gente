@@ -1,10 +1,11 @@
 import importlib.util, os, json
 import pandas as pd, regex as re
-from psycopg import sql, Cursor, Connection, connect
+from psycopg2 import sql, connect
+from psycopg2.extensions import connection, cursor
 from dotenv import load_dotenv
 from .processor import processor
 
-def connect_database() -> tuple[Connection, Cursor]:
+def connect_database() -> tuple[connection, cursor]:
     """
     Estabelece a conexão com o banco de dados utilizando variáveis de ambiente.
 
@@ -31,7 +32,7 @@ def connect_database() -> tuple[Connection, Cursor]:
 
     return conn, conn.cursor()
 
-def get_data_indicator_junction(cursor: Cursor) -> dict[int, list[int]]:
+def get_data_indicator_junction(cursor: cursor) -> dict[int, list[int]]:
     cursor.execute(sql.SQL("""
         SELECT J.indicador_id, ARRAY_AGG(J.dado_id)
         FROM juncao_dados_indicador AS J
@@ -42,7 +43,7 @@ def get_data_indicator_junction(cursor: Cursor) -> dict[int, list[int]]:
 
     return dict(data) if data else None
 
-def get_fact_table_names(cursor: Cursor) -> list[str]:
+def get_fact_table_names(cursor: cursor) -> list[str]:
     cursor.execute("""                              
         SELECT table_name
         FROM information_schema.tables 
@@ -55,7 +56,7 @@ def get_fact_table_names(cursor: Cursor) -> list[str]:
 
     return table_names
 
-def get_table_datapoints(table_name: str, cursor: Cursor) -> pd.DataFrame:
+def get_table_datapoints(table_name: str, cursor: cursor) -> pd.DataFrame:
     initial_df = pd.DataFrame()
 
     cursor.execute(sql.SQL("""
