@@ -19,4 +19,7 @@ if __name__ == "__main__":
                         indicator_datapoints=data_dict
                     )
 
-                    save_csv(df=final_dataframe, nome=f"{subdir}_{file}".replace(".py", ""))
+                    save_csv(
+                        df=final_dataframe,
+                        nome=f"{subdir}_{file}".replace(".py", "").split("/")[1]
+                    )
