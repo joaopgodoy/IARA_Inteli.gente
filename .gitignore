@@ -17,3 +17,5 @@ test.py
 
 /*/__pycache__/
 /boxplots
+
+.env

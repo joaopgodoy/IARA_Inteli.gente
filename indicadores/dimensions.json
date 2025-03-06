@@ -6,7 +6,7 @@
         },
         "3022": {
             "nome": "Escala de acesso a banda larga móvel ",
-            "coluna": "Escala de acesso a banda larga móvel"
+            "indicador_id": 9
         },
         "3027": {
             "nome": "Taxa da população coberta com serviço de coleta de resíduos",
@@ -36,7 +36,7 @@
         },
         "3127": {
             "nome": "Índice da população total com atendimento de esgoto ",
-            "coluna": "IN056_AE - Índice de atendimento total de esgoto referido aos municípios atendidos com água"
+            "indicador_id": 42
         }, 
         "3139": {
             "nome": "Índice de arborização de vias públicas",
@@ -71,7 +71,7 @@
         },
         "4047": {
             "nome": "Índice de volume de esgoto tratado",
-            "coluna": "IN016_AE - Índice de tratamento de esgoto"
+            "indicador_id": 52
         },
         "4070": {
             "nome": "Plano municipal de saneamento básico",
@@ -109,7 +109,7 @@
         },
         "4021": {
             "nome": "Índice de risco e proteção à saúde dos nascidos vivos",
-            "coluna": "Índice de risco e proteção à saúde dos nascidos vivos "
+            "indicador_id": 61
         },
         "4049": {
             "nome": "Mortalidade materna",
@@ -117,7 +117,7 @@
         },
         "4067": {
             "nome": "Mortalidade Infantil",
-            "coluna": "total de óbitos infantis por residencia"
+            "indicador_id": 114
         },
         "4069": {
             "nome": "Drenagem urbana e manejo de águas pluviais",
@@ -126,6 +126,10 @@
     },
     
     "sociodem": {
+        "3025": {
+            "nome": "Índice de GINI da renda domiciliar per capita",
+            "indicador_id": 11
+        },
         "3087": {
             "nome": "PIB per capita do município",
             "coluna": "PIB per capita"
@@ -136,15 +140,19 @@
         },
         "4056": {
             "nome": "PIB Agropecuária",
-            "coluna": "PIBAGROPE"
+            "indicador_id": 90
         },
         "4057": {
             "nome": "PIB Indústria",
-            "coluna": "PIBINDUST"
+            "coluna": 91
         },
         "4058": {
             "nome": "PIB Serviços",
-            "coluna": "PIBSERVIC"
+            "indicador_id": 92
+        },
+        "4059": {
+            "nome": "PIB Administração Pública",
+            "indicador_id": 93
         }
     }
 }
