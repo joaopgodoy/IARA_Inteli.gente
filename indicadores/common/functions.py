@@ -178,13 +178,15 @@ def execute_indicator(data_list: json, path: str, df: pd.DataFrame, indicator_da
 def save_csv(df: pd.DataFrame, nome: str) -> None:
         """Salva o dataframe final em um arquivo CSV."""
         final_columns = [
+            "municipio_id",
             "indicador_id",
+            "ano",
             "tipo_dado",
             "valor",
             "nivel_maturidade"
         ]
 
-        df.to_csv(nome + ".csv", columns=final_columns, index=True)
+        df.reset_index().to_csv(nome + ".csv", columns=final_columns, index=False)
 
         print(f'File saved as {nome}.csv successfully.')
 
