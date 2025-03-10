@@ -17,31 +17,26 @@ class processor:
 
     def get_processed_dataframe(self, df: pd.DataFrame, dados, **kwargs) -> pd.DataFrame:
         """Aplica a fórmula de cálculo de pontuação para cada linha do dataframe."""
-
         colunas = [
             "valor",
-            "municipio_id",
             "indicador_id",
             "tipo_dado",
-            "ano",
             "nivel_maturidade"
         ]
 
-        df_filtrado = df[['municipio_id', 'ano'] + dados.get(self.indicador_id)].dropna(how='any')
+        df_filtrado = df[dados.get(self.indicador_id)].dropna()
 
-        df[colunas] = df_filtrado.apply(
+        df_filtrado[colunas] = df_filtrado.apply(
             lambda row: pd.Series({
                 "valor": (valor := self.formula_calculo(row)),
-                "municipio_id": row.get("municipio_id"),
                 "indicador_id": self.indicador_id,
-                "tipo_dado": type(valor).__name__,
-                "ano": row.get("ano"),
+                "tipo_dado": type(valor).__name__.strip("3264"),
                 "nivel_maturidade": -1
             }),
             axis=1
         )
 
-        return df
+        return df_filtrado
     
     def process_dataframe(self, df, dados, process_function = None, **kwargs) -> None:
         if process_function:

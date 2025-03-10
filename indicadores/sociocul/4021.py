@@ -1,9 +1,9 @@
 from. import *
 
 def equation(row):
-    NVBP = float(row.get(13))
-    NVPN = float(row.get(14))
-    total = float(row.get(16))
+    NVBP = row.get(13)
+    NVPN = row.get(14)
+    total = row.get(16)
 
     return ((NVBP / total) + (NVPN / total)) / 2
 

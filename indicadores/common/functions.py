@@ -60,24 +60,36 @@ def get_table_datapoints(table_name: str, cursor: cursor) -> pd.DataFrame:
     initial_df = pd.DataFrame()
 
     cursor.execute(sql.SQL("""
-        SELECT dado_id, ARRAY_AGG(JSON_BUILD_OBJECT(
-            'municipio_id', municipio_id,
-            'ano', ano,
-            'valor', valor
-        ))
+        SELECT dado_id, tipo_dado,
+               ARRAY_AGG(municipio_id) AS municipios,
+               ARRAY_AGG(ano) AS anos,
+               ARRAY_AGG(valor) AS valores
         FROM {}
-        GROUP BY dado_id;
+        GROUP BY dado_id, tipo_dado;
     """).format(sql.Identifier(table_name[0])))
 
     datapoints = cursor.fetchall()
 
+    dfs, dtypes = [], {}
+
     if datapoints:
-        for dado_id, data_list in datapoints:
-            temp_df = pd.DataFrame(data_list).rename(columns={"valor": dado_id})
+        for data_id, tipo_dado, municipio_id, ano, valor in datapoints:
 
-            initial_df = temp_df if initial_df.empty else initial_df.merge(temp_df, how='outer', on=['municipio_id', 'ano'])
+            dtypes.update({data_id: tipo_dado})
 
-    return initial_df
+            data_list = {
+                'municipio_id': municipio_id,
+                'ano': ano,
+                data_id: valor
+            }
+
+            temp_df = pd.DataFrame(data_list).set_index(["municipio_id", "ano"])
+
+            dfs.append(temp_df)
+
+        initial_df = pd.concat(dfs, axis=1, join="outer")
+
+    return initial_df, dtypes
 
 def get_datapoints_from_database() -> tuple[pd.DataFrame, dict]:
     conn, cursor = connect_database()
@@ -86,16 +98,25 @@ def get_datapoints_from_database() -> tuple[pd.DataFrame, dict]:
     data_dict = get_data_indicator_junction(cursor=cursor)
     table_names = get_fact_table_names(cursor=cursor)
 
+    dfs, dtypes = [], {}
+
     try:
         for table_name in table_names:
-            rows = get_table_datapoints(table_name=table_name, cursor=cursor)
+            rows, new_types = get_table_datapoints(table_name=table_name, cursor=cursor)
 
             if not rows.empty:
-                initial_df = rows if initial_df.empty else initial_df.merge(
-                                                                            rows,
-                                                                            how='outer',
-                                                                            on=['municipio_id', 'ano']
-                                                                        )
+                dfs.append(rows)
+
+                dtypes.update(new_types)
+
+        if dfs:
+            initial_df = pd.concat(dfs, axis=1, join="outer")
+
+            for col, dtype in dtypes.items():
+                if dtype == 'int':
+                    initial_df[col] = initial_df[col].dropna().astype('float').astype('Int64')
+                else:
+                    initial_df[col] = initial_df[col].dropna().astype(dtype)
 
         conn.commit()
 
@@ -109,7 +130,7 @@ def get_datapoints_from_database() -> tuple[pd.DataFrame, dict]:
 
     return initial_df, data_dict
 
-def extract_dimension_from_path(path: str) -> str:
+def extract_dimension_from_path(path: str) -> str | None:
     pattern = r"indicadores/([\w]+)/(\d+)\.py"
     match = re.search(pattern, path)
     
@@ -118,7 +139,7 @@ def extract_dimension_from_path(path: str) -> str:
     
     return match.group(1)   
 
-def load_module(data_list: json, path: str) -> object:
+def load_module(data_list: json, path: str) -> object | None:
     path_absoluto = os.path.abspath(path)
 
     if not os.path.isfile(path_absoluto):
@@ -141,7 +162,7 @@ def load_module(data_list: json, path: str) -> object:
 
     return None
 
-def execute_indicator(data_list: json, path: str, df: pd.DataFrame, indicator_datapoints) -> pd.DataFrame:
+def execute_indicator(data_list: json, path: str, df: pd.DataFrame, indicator_datapoints) -> pd.DataFrame | None:
     try:
         modulo = load_module(data_list, path)
 
@@ -157,15 +178,13 @@ def execute_indicator(data_list: json, path: str, df: pd.DataFrame, indicator_da
 def save_csv(df: pd.DataFrame, nome: str) -> None:
         """Salva o dataframe final em um arquivo CSV."""
         final_columns = [
-            "municipio_id",
             "indicador_id",
-            "ano",
             "tipo_dado",
             "valor",
             "nivel_maturidade"
         ]
 
-        df.dropna(how='all', subset=final_columns).to_csv(nome + ".csv", columns=final_columns, index=False)
+        df.to_csv(nome + ".csv", columns=final_columns, index=True)
 
         print(f'File saved as {nome}.csv successfully.')
 
