@@ -56,7 +56,7 @@ def get_fact_table_names(cursor: cursor) -> list[str]:
 
     return table_names
 
-def get_table_datapoints(table_name: str, cursor: cursor) -> pd.DataFrame:
+def get_table_datapoints(table_name: str, cursor: cursor) -> tuple[pd.DataFrame, dict]:
     initial_df = pd.DataFrame()
 
     cursor.execute(sql.SQL("""
