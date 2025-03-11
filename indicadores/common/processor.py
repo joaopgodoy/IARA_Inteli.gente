@@ -1,16 +1,31 @@
-import pandas as pd, os, json
+import pandas as pd, json
 
 class processor:
 
-    def __init__(self, json_object: json, score = None) -> None:
+    def __init__(self, json_object: json) -> None:
         self.nome = json_object.get('nome', 'processed_data').strip().replace(' ', '_')
         self.indicador_id = json_object.get('indicador_id', None)
         self.pesos = json_object.get('pesos', None)
         self.coluna_origem = json_object.get('coluna', None)
-        self.formula_calculo = score if score else lambda row: row.iloc[-1]
+        self.ranges = json_object.get('ranges', None)
 
     def __str__(self):
         return f"ID: {self.indicador_id}\nNome: {self.nome}"
+    
+    def formula_calculo(self, row):
+        return row.iloc[-1]
+    
+    def ranges_maturidade(self, value):
+        if self.ranges is not None:
+            for level, (bottom_range, upper_range) in enumerate(self.ranges, start=1):
+                if bottom_range <= value <= upper_range:
+                    return level
+            
+        return -1
+    
+    @property
+    def process_function(self) -> pd.DataFrame | None:
+        return None
     
     def execute_processing(self, curr_df: pd.DataFrame = None, dados = None):
         return self.process_dataframe(df=curr_df, dados=dados)
@@ -28,18 +43,18 @@ class processor:
 
         df_filtrado[colunas] = df_filtrado.apply(
             lambda row: pd.Series({
-                "valor": (valor := self.formula_calculo(row)),
+                "valor": (valor := self.formula_calculo(row, **kwargs).round(3)),
                 "indicador_id": self.indicador_id,
                 "tipo_dado": type(valor).__name__.strip("3264"),
-                "nivel_maturidade": -1
+                "nivel_maturidade": self.ranges_maturidade(valor)
             }),
             axis=1
         )
 
         return df_filtrado
     
-    def process_dataframe(self, df, dados, process_function = None, **kwargs) -> None:
-        if process_function:
-            df = process_function(df)
+    def process_dataframe(self, df, dados, **kwargs) -> None:
+        if self.process_function:
+            df = self.process_function(df)
 
         return self.get_processed_dataframe(df=df, dados=dados, **kwargs)

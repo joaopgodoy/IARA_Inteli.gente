@@ -109,7 +109,16 @@
         },
         "4021": {
             "nome": "Índice de risco e proteção à saúde dos nascidos vivos",
-            "indicador_id": 61
+            "indicador_id": 61,
+            "ranges": [
+                [0.4, 1],
+                [0.18, 0.399],
+                [0.13, 0.179],
+                [0.095, 0.129],
+                [0.055, 0.094],
+                [0.015, 0.054],
+                [0, 0.014]
+            ]
         },
         "4049": {
             "nome": "Mortalidade materna",
