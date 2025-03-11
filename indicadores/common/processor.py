@@ -6,7 +6,6 @@ class processor:
         self.nome = json_object.get('nome', 'processed_data').strip().replace(' ', '_')
         self.indicador_id = json_object.get('indicador_id', None)
         self.pesos = json_object.get('pesos', None)
-        self.coluna_origem = json_object.get('coluna', None)
         self.ranges = json_object.get('ranges', None)
 
     def __str__(self):
@@ -23,38 +22,29 @@ class processor:
             
         return -1
     
-    @property
-    def process_function(self) -> pd.DataFrame | None:
-        return None
+    def process_function(self, df: pd.DataFrame) -> pd.DataFrame | None:
+        return df
     
     def execute_processing(self, curr_df: pd.DataFrame = None, dados = None):
         return self.process_dataframe(df=curr_df, dados=dados)
 
     def get_processed_dataframe(self, df: pd.DataFrame, dados, **kwargs) -> pd.DataFrame:
         """Aplica a fórmula de cálculo de pontuação para cada linha do dataframe."""
-        colunas = [
-            "valor",
-            "indicador_id",
-            "tipo_dado",
-            "nivel_maturidade"
-        ]
 
         df_filtrado = df[dados.get(self.indicador_id)].dropna()
 
-        df_filtrado[colunas] = df_filtrado.apply(
-            lambda row: pd.Series({
-                "valor": (valor := self.formula_calculo(row, **kwargs).round(3)),
-                "indicador_id": self.indicador_id,
-                "tipo_dado": type(valor).__name__.strip("3264"),
-                "nivel_maturidade": self.ranges_maturidade(valor)
-            }),
-            axis=1
-        )
+        df_filtrado["valor"] = df_filtrado.apply(lambda row: self.formula_calculo(row, **kwargs), axis=1)
+
+        if df_filtrado["valor"].dtype == "float64":
+            df_filtrado["valor"] = df_filtrado["valor"].round(3)
+
+        df_filtrado["tipo_dado"] = str(df_filtrado['valor'].dtype).strip("3264")
+        df_filtrado["nivel_maturidade"] = df_filtrado["valor"].apply(self.ranges_maturidade)
+        df_filtrado["indicador_id"] = self.indicador_id
 
         return df_filtrado
     
     def process_dataframe(self, df, dados, **kwargs) -> None:
-        if self.process_function:
-            df = self.process_function(df)
+        df = self.process_function(df)
 
         return self.get_processed_dataframe(df=df, dados=dados, **kwargs)

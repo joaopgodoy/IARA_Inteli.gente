@@ -4,6 +4,7 @@ from psycopg2 import sql, connect
 from psycopg2.extensions import connection, cursor
 from dotenv import load_dotenv
 from .processor import processor
+from .constants import dtypes_dict
 
 def connect_database() -> tuple[connection, cursor]:
     """
@@ -75,7 +76,7 @@ def get_table_datapoints(table_name: str, cursor: cursor) -> tuple[pd.DataFrame,
     if datapoints:
         for data_id, tipo_dado, municipio_id, ano, valor in datapoints:
 
-            dtypes.update({data_id: tipo_dado})
+            dtypes[data_id] = tipo_dado
 
             data_list = {
                 'municipio_id': municipio_id,
@@ -91,8 +92,7 @@ def get_table_datapoints(table_name: str, cursor: cursor) -> tuple[pd.DataFrame,
 
     return initial_df, dtypes
 
-def get_datapoints_from_database() -> tuple[pd.DataFrame, dict]:
-    conn, cursor = connect_database()
+def get_datapoints_from_database(cursor: cursor) -> tuple[pd.DataFrame, dict]:
     initial_df = pd.DataFrame()
 
     data_dict = get_data_indicator_junction(cursor=cursor)
@@ -100,33 +100,22 @@ def get_datapoints_from_database() -> tuple[pd.DataFrame, dict]:
 
     dfs, dtypes = [], {}
 
-    try:
-        for table_name in table_names:
-            rows, new_types = get_table_datapoints(table_name=table_name, cursor=cursor)
+    for table_name in table_names:
+        rows, new_types = get_table_datapoints(table_name=table_name, cursor=cursor)
 
-            if not rows.empty:
-                dfs.append(rows)
+        if not rows.empty:
+            dfs.append(rows)
 
-                dtypes.update(new_types)
+            dtypes.update(new_types)
 
-        if dfs:
-            initial_df = pd.concat(dfs, axis=1, join="outer")
+    if dfs:
+        initial_df = pd.concat(dfs, axis=1, join="outer")
 
-            for col, dtype in dtypes.items():
-                if dtype == 'int':
-                    initial_df[col] = initial_df[col].dropna().astype('float').astype('Int64')
-                else:
-                    initial_df[col] = initial_df[col].dropna().astype(dtype)
-
-        conn.commit()
-
-    except Exception as e:
-        conn.rollback()
-        print(f"Error executing query: {e}")
-
-    finally:
-        cursor.close()
-        conn.close()
+        for col, dtype in dtypes.items():
+            if dtype == "int":
+                initial_df[col] = initial_df[col].astype("Float64").astype("Int64")
+            else:
+                initial_df[col] = initial_df[col].astype(dtypes_dict.get(dtype, dtype))
 
     return initial_df, data_dict
 
