@@ -140,7 +140,7 @@ def insert_df_indicators_table(df:pd.DataFrame,has_indicator_score = False)->Non
         tipo_dado = row.tipo_dado
 
         if has_indicator_score: #tem nota do indicador de 1 a 7 
-            nota_indicador = (row.nota_indicador)
+            nota_indicador = (row.nivel_maturidade)
             df_rows.append(
             (codigo_municipio,indicator_id,ano,tipo_dado,valor,nota_indicador)
             )
