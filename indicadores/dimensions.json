@@ -1,24 +1,20 @@
 {
     "econ": {
         "3021": {
-            "nome": "Escala de acesso a banda larga fixa",
-            "coluna": "Escala de acesso a banda larga fixa"
+            "nome": "Escala de acesso a banda larga fixa"
         },
         "3022": {
             "nome": "Escala de acesso a banda larga móvel ",
             "indicador_id": 9
         },
         "3027": {
-            "nome": "Taxa da população coberta com serviço de coleta de resíduos",
-            "coluna": "IN015_RS - Taxa de cobertura do serviço de coleta de resíduo doméstico em relação à população total do município"
+            "nome": "Taxa da população coberta com serviço de coleta de resíduos"
         },
         "3117": {
-            "nome": "Índice da população total com atendimento de água",
-            "coluna": "IN055_AE - Índice de atendimento total de água"
+            "nome": "Índice da população total com atendimento de água"
         },
         "3122": {
-            "nome": "Coleta seletiva de resíduos no município",
-            "coluna": "CS001 - Existe coleta seletiva formalizada pela prefeitura no município_"
+            "nome": "Coleta seletiva de resíduos no município"
         },
         "3124": {
             "nome": "Serviços regulares de transporte de passageiros",
@@ -39,43 +35,35 @@
             "indicador_id": 42
         }, 
         "3139": {
-            "nome": "Índice de arborização de vias públicas",
-            "coluna": "Domicílios particulares permanentes urbanos com Existência de arborização de vias públicas"
+            "nome": "Índice de arborização de vias públicas"
         },
         "3141": {
-            "nome": "Índice da população urbana com atendimento de esgoto",
-            "coluna": "IN024_AE - Índice de atendimento urbano de esgoto referido aos municípios atendidos com água"
+            "nome": "Índice da população urbana com atendimento de esgoto"
         },
         "3145": {
-            "nome": "Índice de iluminação de vias públicas",
-            "coluna": "Domicílios particulares permanentes urbanos com Existência de iluminação pública no entorno"
+            "nome": "Índice de iluminação de vias públicas"
         }
     },
 
     "environ": {
         "3024": {
-            "nome": "Índice de volume de esgoto coletado",
-            "coluna": "IN015_AE - Índice de coleta de esgoto"
+            "nome": "Índice de volume de esgoto coletado"
         },
         "3028": {
-            "nome": "Consumo médio per capita de água" ,
-            "coluna": "IN022_AE - Consumo médio percapita de água"
+            "nome": "Consumo médio per capita de água"
         },
         "3110": {
-            "nome": "Índice de perdas na distribuição de água ",
-            "coluna": "IN049_AE - Índice de perdas na distribuição"
+            "nome": "Índice de perdas na distribuição de água "
         },
         "4007": {
-            "nome": "Percentual de material recolhido pela coleta seletiva",
-            "coluna": "IN053_RS - Taxa de material recolhido pela coleta seletiva (exceto mat. orgânica) em relação à quantidade total coletada de resíduos sólidos domésticos"
+            "nome": "Percentual de material recolhido pela coleta seletiva"
         },
         "4047": {
             "nome": "Índice de volume de esgoto tratado",
             "indicador_id": 52
         },
         "4070": {
-            "nome": "Plano municipal de saneamento básico",
-            "coluna": "PO028 - Existência do plano municipal de saneamento básico"
+            "nome": "Plano municipal de saneamento básico"
         },
         "4071": {
             "nome": "Índice de volume de água tratada importado"
@@ -97,15 +85,36 @@
         },
         "3011": {
             "nome": "Taxa de analfabetismo",
-            "coluna": "Taxa de analfabetismo "
+            "indicador_id": 5,
+            "ranges": [
+                [20, 100],
+                [9.4, 19.99],
+                [6.8, 9.39],
+                [4.8, 6.79],
+                [3, 4.79],
+                [1, 2.99],
+                [0, 0.99]
+            ]
         },
         "3086": {
-            "nome": "Índice de desenvolvimento da educação básica (IDEB) - anos finais",
-            "coluna": "Índice de desenvolvimento da educação básica (IDEB) - anos finais "
+            "nome": "Índice de desenvolvimento da educação básica (IDEB) - anos finais"
         },
         "3095": {
             "nome": "Leitos hospitalares na rede pública municipal",
-            "coluna": "Leitos hospitalares na rede pública municipal"
+            "indicador_id": 30,
+            "ranges": [
+                [0, 0],
+                [1, 169],
+                [170, 248],
+                [249, 496],
+                [497, 887],
+                [888, 1199],
+                [1200, 100000]
+            ]
+        },
+        "3096": {
+            "nome": "Índice de Médicos disponíveis na rede pública municipal",
+            "indicador_id": 31
         },
         "4021": {
             "nome": "Índice de risco e proteção à saúde dos nascidos vivos",
@@ -122,15 +131,14 @@
         },
         "4049": {
             "nome": "Mortalidade materna",
-            "coluna": "obitos maternos"
+            "indicador_id": 83
         },
         "4067": {
             "nome": "Mortalidade Infantil",
             "indicador_id": 114
         },
         "4069": {
-            "nome": "Drenagem urbana e manejo de águas pluviais",
-            "coluna": "PO007 - Drenagem urbana e manejo de águas pluviais"
+            "nome": "Drenagem urbana e manejo de águas pluviais"
         }
     },
     
@@ -141,11 +149,19 @@
         },
         "3087": {
             "nome": "PIB per capita do município",
-            "coluna": "PIB per capita"
+            "indicador_id": 29
+        },
+        "3135": {
+            "nome": "População ocupada com vínculo formal",
+            "indicador_id": 44
         },
         "4001": {
             "nome": "Índice de desenvolvimento humano do município (IDH-M)",
-            "coluna": "idh-m"
+            "indicador_id": 47
+        },
+        "4013": {
+            "nome": "Capacidade de pagamento dos municípios (CAPAG)",
+            "indicador_id": 56
         },
         "4056": {
             "nome": "PIB Agropecuária",
@@ -153,7 +169,7 @@
         },
         "4057": {
             "nome": "PIB Indústria",
-            "coluna": 91
+            "indicador_id": 91
         },
         "4058": {
             "nome": "PIB Serviços",

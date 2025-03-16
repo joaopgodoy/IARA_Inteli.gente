@@ -1,5 +1,5 @@
 from . import *
-from ..common.functions import weighted_sum
+from ..common.utils import weighted_sum
 import pandas as pd
 
 class SC_3007(processor):
