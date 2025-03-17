@@ -7,6 +7,8 @@ class EC_3139(processor):
 
     def formula_calculo(self, row):
         try:
-            return 100 * (row['Domicílios particulares permanentes urbanos com Existência de iluminação pública no entorno'] / row['Total_Domicílios'])
+            # 37: 'domicílios particulares permanentes com existência de iluminação pública no entorno'
+            # Total_Domicílios ainda não está na VM
+            return 100 * (row[37] / row['Total_Domicílios'])
         except ZeroDivisionError:
             return 0
