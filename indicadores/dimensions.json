@@ -181,6 +181,10 @@
             "nome": "Capacidade de pagamento dos municípios (CAPAG)",
             "indicador_id": 56
         },
+        "4038": {
+            "nome": "Rede de influência da cidade",
+            "indicador_id": 72
+        },
         "4056": {
             "nome": "PIB Agropecuária",
             "indicador_id": 90
