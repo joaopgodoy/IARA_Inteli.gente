@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
                             insert_df_indicators_table(
                                 df=final_dataframe,
-                                has_indicator_score=False
+                                has_indicator_score=True
                             )
 
                             print(f"{subdir}/{file} Succeeded!")
