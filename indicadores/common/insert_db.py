@@ -142,11 +142,20 @@ def insert_df_indicators_table(df:pd.DataFrame,has_indicator_score = False)->Non
         if has_indicator_score: #tem nota do indicador de 1 a 7 
             nota_indicador = (row.nivel_maturidade)
             df_rows.append(
-            (codigo_municipio,indicator_id,ano,tipo_dado,valor,nota_indicador)
+                (codigo_municipio,
+                 indicator_id,
+                 ano,
+                 tipo_dado,
+                 valor,
+                 nota_indicador)
             )
         else:
             df_rows.append(
-            (codigo_municipio,indicator_id,ano,tipo_dado,valor,INDICATOR_SCORE_NULL_VAL)
+                (codigo_municipio,
+                 indicator_id,
+                 ano,
+                 tipo_dado,valor,
+                 INDICATOR_SCORE_NULL_VAL)
             )
 
     DBconnection.insert_many_values(

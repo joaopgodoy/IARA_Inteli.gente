@@ -93,7 +93,8 @@ class DBconnection():
             query = f"""INSERT INTO {table_name} ({columns}) VALUES {placeholders}
                      ON CONFLICT (municipio_id, indicador_id, ano)
                      DO UPDATE
-                        SET nivel_maturidade = EXCLUDED.nivel_maturidade;""" 
+                        SET nivel_maturidade = EXCLUDED.nivel_maturidade,
+                            valor = EXCLUDED.valor;""" 
             try:
                   c.execute(query, flattened_values)
             except psycopg2.Error as e:
