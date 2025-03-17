@@ -1,4 +1,5 @@
 from . import *
+import pandas as pd
 
 class EC_3139(processor):
 
@@ -12,3 +13,4 @@ class EC_3139(processor):
             return 100 * (row[38] / row['Total_Domicílios'])
         except ZeroDivisionError:
             return 0
+    
