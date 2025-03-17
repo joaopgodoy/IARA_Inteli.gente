@@ -114,7 +114,16 @@
         },
         "3096": {
             "nome": "Índice de Médicos disponíveis na rede pública municipal",
-            "indicador_id": 31
+            "indicador_id": 31,
+            "ranges":  [
+                [0, 1],
+                [1.1, 2.5],
+                [2.51, 10],
+                [10.01, 30],
+                [30.01, 50],
+                [50.01, 100],
+                [100.01, 200]
+            ]
         },
         "4021": {
             "nome": "Índice de risco e proteção à saúde dos nascidos vivos",
@@ -131,7 +140,16 @@
         },
         "4049": {
             "nome": "Mortalidade materna",
-            "indicador_id": 83
+            "indicador_id": 83,
+            "ranges": [
+                [0.7, 1],
+                [0.35, 0.6999],
+                [0.2, 0.3499],
+                [0.1, 0.1999],
+                [0.04, 0.0999],
+                [0.01, 0.0399],
+                [0, 0.0099]
+            ]
         },
         "4067": {
             "nome": "Mortalidade Infantil",
