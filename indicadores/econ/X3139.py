@@ -1,6 +1,8 @@
 from . import *
 import pandas as pd
 
+# precisa atualizar ranges para faixas
+
 class EC_3139(processor):
 
     def __init__(self, data_list):
